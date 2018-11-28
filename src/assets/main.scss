@@ -1,4 +1,5 @@
 @import './mixins.scss';
+@import './transitions.scss';
 
 $colorPrimary: #FA3CB1;
 $colorSecondary: #5CC5EA;
@@ -11,6 +12,19 @@ $colorSecondary: #5CC5EA;
   background: -webkit-linear-gradient(-45deg, #ebebeb 35%,#7fcde8 100%); /* Chrome10-25,Safari5.1-6 */
   background: linear-gradient(135deg, #ebebeb 35%,#7fcde8 100%) !important; /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
   filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#ebebeb', endColorstr='#7fcde8',GradientType=1 ); /* IE6-9 fallback on horizontal gradient */
+}
+
+.drawer-header-name{
+  font-size: 1.3em;
+  font-weight: bold;
+}
+
+.drawer-header-icon{
+  font-size: 2.4em;
+}
+
+.drawer-menu-current{
+  font-weight: bold;
 }
 
 .center-image{

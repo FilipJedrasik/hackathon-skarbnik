@@ -36,13 +36,17 @@ export default {
 
         localStorage.setItem(process.env.VUE_APP_STORAGE_KEY, data.token);
         Cookie.set(process.env.VUE_APP_STORAGE_KEY, data.token);
+
+        const expires = new Date(new Date().getTime() + (24 * 60 * 60 * 1000));
+        localStorage.setItem(process.env.VUE_APP_EXPIRES_KEY, expires);
+        Cookie.set(process.env.VUE_APP_EXPIRES_KEY, expires);
+
         Vue.axios.defaults.headers.common['Authorization'] = 'Basic ' + data.token;
 
         commit('changeStatus', 2);
         commit('update', data.token);
 
       } catch(e){
-        console.log(e)
         commit('changeStatus', 3); // Error
         localStorage.removeItem(process.env.VUE_APP_STORAGE_KEY);
         throw 'Podane dane są nieprawidłowe!';
@@ -53,6 +57,9 @@ export default {
       commit('clearToken');
       Cookie.remove(process.env.VUE_APP_STORAGE_KEY);
       localStorage.removeItem(process.env.VUE_APP_STORAGE_KEY);
+
+      Cookie.remove(process.env.VUE_APP_EXPIRES_KEY);
+      localStorage.removeItem(process.env.VUE_APP_EXPIRES_KEY);
     }
   }
 }

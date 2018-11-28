@@ -55,7 +55,7 @@
                                             <v-text-field
                                                     prepend-icon="mail"
                                                     v-model="teacher.email"
-                                                    :rules="[...emailRules, ...emailUsed]"
+                                                    :rules="emailUsed"
                                                     @keyup.native.esc="dialog = false"
                                                     @keyup.native.enter="valid || JSON.stringify(teacher) !== JSON.stringify(beforeEdit) ? (editedIndex === -1 ? add() : edit()) : ''"
                                                     label="Adres email"
@@ -66,8 +66,8 @@
                                         <v-flex xs12>
                                             <v-text-field
                                                     prepend-icon="person"
-                                                    v-model="teacher.login"
-                                                    :rules="loginRules"
+                                                    v-model="teacher.username"
+                                                    :rules="loginUsed"
                                                     @keyup.native.esc="dialog = false"
                                                     @keyup.native.enter="valid || JSON.stringify(teacher) !== JSON.stringify(beforeEdit) ? (editedIndex === -1 ? add() : edit()) : ''"
                                                     label="Login"
@@ -119,7 +119,7 @@
                 <td>{{ props.item.name }}</td>
                 <template v-if="!$vuetify.breakpoint.xsOnly">
                     <td>{{ props.item.email }}</td>
-                    <td>{{ props.item.login }}</td>
+                    <td>{{ props.item.username }}</td>
                 </template>
                 <template v-if="$vuetify.breakpoint.mdAndUp">
                     <td>{{ props.item.password }}</td>
@@ -179,8 +179,7 @@
         name: '',
         password: '',
         role: 1,
-        username: '',
-        login: ''
+        username: ''
       },
       deletingTeacher: {
         teacher: {},
@@ -202,11 +201,21 @@
       emailUsed(){
         return [
           v => Array.isArray(this.teachers) && this.teachers.filter(
-              x => this.editingIndex != -1 ?
-                  (this.teacher.email !== x.email && x.email == v.trim() )
-                  : x.email == v.trim()
-                ).length == 0 || 'Podany email jest już zajęty',
+                x => this.editedIndex != -1 ?
+                    (this.beforeEdit.email !== x.email && x.email == v.trim() )
+                    : x.email == v.trim()
+            ).length == 0 || 'Podany email jest już zajęty',
             ...this.emailRules
+        ];
+      },
+      loginUsed(){
+        return [
+          v => Array.isArray(this.teachers) && this.teachers.filter(
+              x => this.editedIndex != -1 ?
+                  (this.beforeEdit.username !== x.username && x.username == v.trim() )
+                  : x.username == v.trim()
+          ).length == 0 || 'Podany login jest już zajęty',
+          ...this.loginRules
         ];
       },
       headers(){
@@ -238,8 +247,6 @@
       async add(){
         if(this.$refs.teacherForm.validate()){
           try{
-            this.teacher.username = this.teacher.login;
-
             this.$store.dispatch('teachers/addTeacher', this.teacher);
 
             this.dialog = false;
@@ -248,8 +255,7 @@
                 name: '',
                 password: '',
                 role: 1,
-                username: '',
-                login: ''
+                username: ''
             };
 
             this.response.content = 'Udało się dodać nauczyciela';
@@ -295,7 +301,7 @@
       },
 
       editItem (teacher, index) {
-        this.editedIndex = index;
+        this.editedIndex = this.teachers.findIndex(v => v.id_field === teacher.id_field);
         this.beforeEdit = Object.assign({}, teacher);
         this.teacher = Object.assign({}, teacher);
         this.dialog = true;

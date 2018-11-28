@@ -1,4 +1,7 @@
 import Vue from 'vue'
+import router from './../router'
+import store from './../store'
+import Cookie from 'js-cookie';
 
 export default {
   namespaced: true,
@@ -24,7 +27,7 @@ export default {
   },
 
   actions: {
-    update: async ({commit}) => {
+    update: async ({commit, dispatch}) => {
       try{
         if(process.env.VUE_APP_NOAPI === 'true'){
           if(process.env.VUE_APP_USERSEED_TYPE === 'nochanges') {
@@ -56,10 +59,33 @@ export default {
             role: data.role,
             changed_password: data.password.length <= 8 ? 0 : 1
           });
+
+          if(new Date(new Date(localStorage.getItem(process.env.VUE_APP_EXPIRES_KEY)).getTime() - (12 * 60 * 60 * 1000)) <= new Date()){
+            dispatch('refresh');
+          }
         }
       } catch(e){
-          console.log(e)
-          throw 'Wystąpił niezidentyfikowany problem, przepraszamy!';
+        console.log(e)
+        store.dispatch('auth/logout');
+        router.push('/');
+      }
+    },
+
+    refresh: async ({commit}) => {
+      try{
+        delete Vue.axios.defaults.headers.common['Authorization'];
+
+        let { data } = await Vue.axios.post('users/refresh', {
+          token: localStorage.getItem(process.env.VUE_APP_STORAGE_KEY)
+        });
+
+        const expires = new Date(new Date().getTime() + (30 * 60 * 60 * 1000));
+        localStorage.setItem(process.env.VUE_APP_EXPIRES_KEY, expires);
+        Cookie.set(process.env.VUE_APP_EXPIRES_KEY, expires);
+
+      } catch(e){
+        store.dispatch('auth/logout');
+        router.push('/');
       }
     },
 

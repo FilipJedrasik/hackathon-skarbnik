@@ -1,0 +1,7 @@
+.t-fade-leave-to, .t-fade-enter{
+  opacity: 0;
+}
+
+.t-fade-enter-active, .t-fade-leave-active{
+  transition: 1s;
+}

@@ -1,5 +1,8 @@
 <template>
   <v-app id="inspire">
+    <transition name="t-fade">
+      <v-progress-linear v-if='logging' color="primary" style="position:fixed;top:0;margin:0;" indeterminate></v-progress-linear>
+    </transition>
     <v-content>
       <v-container fluid fill-height>
         <v-layout align-center justify-center>
@@ -13,7 +16,7 @@
                 <v-toolbar-title>Logowanie</v-toolbar-title>
               </v-toolbar>
               <v-card-text>
-                <LoginForm/>
+                <LoginForm @operation="logging = true"/>
               </v-card-text>
             </v-card>
           </v-flex>
@@ -28,7 +31,10 @@
   export default {
     components:{
       LoginForm
-    }
+    },
+    data: () => ({
+      logging: false
+    })
   }
 </script>
 

@@ -57,6 +57,7 @@
     methods:{
       async login() {
         if (this.$refs.loginForm.validate()) {
+          this.$emit('operation');
           try {
             await this.$store.dispatch('auth/auth', this.user);
             await this.$store.dispatch('user/update');

@@ -6,20 +6,37 @@
                 fixed
                 app
         >
-            <v-list dense>
-                <template v-for="item in items">
-                    <v-list-tile
-                            :key="item.text"
-                            @click="$router.push(item.target)">
-                        <v-list-tile-action>
-                            <v-icon>{{ item.icon }}</v-icon>
-                        </v-list-tile-action>
+            <v-toolbar color="secondary" dark class="transparent">
+                <v-list class="pa-0">
+                    <v-list-tile avatar>
+                        <v-list-tile-avatar>
+                            <v-icon class="drawer-header-icon"dark>account_circle</v-icon>
+                        </v-list-tile-avatar>
+
                         <v-list-tile-content>
-                            <v-list-tile-title>
-                                {{ item.text }}
-                            </v-list-tile-title>
+                            <v-list-tile-title class="drawer-header-name">{{$store.getters['user/getUser'].name}}</v-list-tile-title>
                         </v-list-tile-content>
                     </v-list-tile>
+                </v-list>
+            </v-toolbar>
+
+            <v-divider></v-divider>
+
+            <v-list dense>
+                <template v-for="item in items">
+                        <v-list-tile
+                                :key="item.text"
+                                :disabled="fullPath == item.target"
+                                @click="fullPath != item.target ? $router.push(item.target) : ''">
+                            <v-list-tile-action>
+                                <v-icon :color="fullPath == item.target ? 'primary' : ''">{{ item.icon }}</v-icon>
+                            </v-list-tile-action>
+                            <v-list-tile-content>
+                                <v-list-tile-title :class="{ 'drawer-menu-current': fullPath == item.target }">
+                                    {{ item.text }}
+                                </v-list-tile-title>
+                            </v-list-tile-content>
+                        </v-list-tile>
                 </template>
             </v-list>
         </v-navigation-drawer>
@@ -55,6 +72,7 @@
 
 <script>
   export default {
+    name: 'AdminViewLayout',
     beforeRouteEnter (to, from, next) {
       if(to.fullPath === '/admin')
         next('/admin/');
@@ -76,6 +94,9 @@
     computed:{
       firstName(){
         return this.$store.getters['user/getUser'].name.split(' ')[0];
+      },
+      fullPath(){
+        return this.$route.path;
       }
     },
     props: {
