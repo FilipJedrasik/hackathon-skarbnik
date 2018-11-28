@@ -33,12 +33,11 @@
 
                     <v-form
                             v-model="valid"
-                            ref="teachers"
-                            @submit="editedIndex === -1 ? add() : edit()">
+                            lazy-validation
+                            @submit="editedIndex === -1 ? add() : edit()"
+                            ref="teacherform">
                         <v-card-text>
                             <v-container grid-list-md>
-                                    <v-form style="width:100%" ref="teacherForm" v-model="valid">
-
                                         <v-flex xs12>
                                             <v-text-field
                                                     prepend-icon="assignment_ind"
@@ -87,11 +86,9 @@
                                                     required
                                             ></v-text-field>
                                         </v-flex>
-
-                                    </v-form>
                             </v-container>
                             <div style="text-align:right;">
-                                <v-btn color="secondary" @click="dialog = false">Anuluj</v-btn>
+                                <v-btn color="secondary" @click.native="dialog = false">Anuluj</v-btn>
                                 <v-btn
                                         color="primary"
                                         @click.native="editedIndex === -1 ? add() : edit()"
@@ -163,29 +160,33 @@
 
   export default {
     data: () => ({
-      loading: false,
-      dialog: false,
-      valid: false,
-      beforeEdit: {},
-      response:{
+      loading: false, // Is data being fetched from the server now?
+      dialog: false, // Adding/editing Modal stance
+      valid: false, // is Adding/editing form valid?
+
+      beforeEdit: {}, // Editing teacher start stance
+
+      response:{ // UI Util response obj
         type: 'error',
         modal: false,
         content: null,
         ok: null,
         cancel: null
       },
-      teacher: {
+
+      teacher: { // Currently adding/editing Teacher
         email: '',
         name: '',
         password: '',
-        role: 1,
         username: ''
       },
-      deletingTeacher: {
-        teacher: {},
-        index: null
+
+      deletingTeacher: { // Teacher to delete
+        teacher: {}, // Teacher Object
+        index: null // ID in $store.teachers Array
       },
-      editedIndex: -1
+
+      editedIndex: -1 // Currently edited Index in $store.teachers Array
     }),
 
     computed: {
@@ -198,26 +199,32 @@
       teachers(){
         return this.$store.getters['teachers/getTeachers'];
       },
+
+      // Basic email rules + unique values
       emailUsed(){
         return [
-          v => Array.isArray(this.teachers) && this.teachers.filter(
+            ...this.emailRules,
+          v => v != null && Array.isArray(this.teachers) && this.teachers.filter(
                 x => this.editedIndex != -1 ?
                     (this.beforeEdit.email !== x.email && x.email == v.trim() )
                     : x.email == v.trim()
-            ).length == 0 || 'Podany email jest już zajęty',
-            ...this.emailRules
+            ).length == 0 || 'Podany email jest już zajęty'
         ];
       },
+
+      // Basic login rules + unique values
       loginUsed(){
         return [
-          v => Array.isArray(this.teachers) && this.teachers.filter(
+          ...this.loginRules,
+          v => v != null && Array.isArray(this.teachers) && this.teachers.filter(
               x => this.editedIndex != -1 ?
                   (this.beforeEdit.username !== x.username && x.username == v.trim() )
                   : x.username == v.trim()
-          ).length == 0 || 'Podany login jest już zajęty',
-          ...this.loginRules
+          ).length == 0 || 'Podany login jest już zajęty'
         ];
       },
+
+      // Responsive headers
       headers(){
         if(this.$vuetify.breakpoint.xsOnly){
           return [
@@ -244,8 +251,9 @@
     },
 
     methods: {
+      // Adding new teacher
       async add(){
-        if(this.$refs.teacherForm.validate()){
+        if(this.$refs.teacherform.validate()){
           try{
             this.$store.dispatch('teachers/addTeacher', this.teacher);
 
@@ -268,14 +276,16 @@
           }
         }
       },
+
+      // Editing existing teacher
       async edit(){
-        if(this.$refs.teacherForm.validate()) {
+        if(this.$refs.teacherform.validate()) {
           try {
             delete this.teacher.password;
-            const pos = this.teachers.findIndex(v => v.id_field === this.teacher.id_field);
+
             this.$store.dispatch('teachers/updateTeacher', {
               teacher: this.teacher,
-              pos
+              id: this.teacher.id_field
             });
 
             this.dialog = false;
@@ -300,6 +310,8 @@
         }
       },
 
+      // Opening editing teacher modal
+      // Preparing essential variables
       editItem (teacher, index) {
         this.editedIndex = this.teachers.findIndex(v => v.id_field === teacher.id_field);
         this.beforeEdit = Object.assign({}, teacher);
@@ -307,6 +319,8 @@
         this.dialog = true;
       },
 
+      // Opening delete teacher modal
+      // Preparing essential variables
       deleteItem (teacher, index) {
         this.response.header = 'Uwaga';
         this.response.content = `Czy na pewno chcesz usunąć konto ${teacher.name}?`;
@@ -316,14 +330,13 @@
         this.response.modal = true;
 
         this.deletingTeacher.teacher = teacher;
-        this.deletingTeacher.index = index;
+        this.deletingTeacher.index = this.teachers.findIndex(v => v.id_field === teacher.id_field);
       },
+
+      // Deleting existing teacher
       async asDeleteTeacher(){
         try{
-          await this.$store.dispatch('teachers/deleteTeacher', {
-            id: this.deletingTeacher.teacher.id,
-            pos: this.deletingTeacher.index
-          });
+          await this.$store.dispatch('teachers/deleteTeacher', this.deletingTeacher.teacher.id_field);
 
           this.response.modal = false;
 
@@ -340,33 +353,25 @@
           this.response.cancel = null;
         }
       },
+
+      // Clearing edit's variables
+      // Opening Add Teacher Modal
       showAddModal(){
         this.editedIndex = -1;
         this.teacher = {
-          email: '',
-          name: '',
-          password: '',
-          role: 1,
-          username: '',
-          login: ''
+          email: null,
+          name: null,
+          password: null,
+          username: null
         };
+
+        this.$refs.teacherform.resetValidation();
+
         this.dialog = true;
-      },
-      close () {
-        this.dialog = false
-        setTimeout(() => {
-          this.editedItem = Object.assign({}, this.defaultItem)
-          this.editedIndex = -1
-        }, 300)
       }
     },
     components: {
       UtilModal
-    },
-    watch:{
-      dialog (val) {
-        val || this.close()
-      }
     },
 
     async created(){

@@ -9,16 +9,20 @@ Vue.mixin({
       v => !!v || 'Imię i nazwisko jest wymagane',
       v => (v && v.length >= 5) || 'Imię i nazwisko musi mieć conajmniej 7 znaków',
       v => {
-        const parts = v.split(' ');
-        if(parts.length !== 2){
-          return 'Błędna forma';
-        }
+        if(v !== null){
+          const parts = v.split(' ');
+          if(parts.length !== 2){
+            return 'Błędna forma';
+          }
 
-        if(!capitalPolishWord.test(parts[0]) || !capitalPolishLastname.test(parts[1])){
-          return 'Błędna forma';
-        }
+          if(!capitalPolishWord.test(parts[0]) || !capitalPolishLastname.test(parts[1])){
+            return 'Błędna forma';
+          }
 
-        return true;
+          return true;
+        } else {
+          return 'Imię i nazwisko jest wymagane';
+        }
       }
     ],
     loginRules: [
