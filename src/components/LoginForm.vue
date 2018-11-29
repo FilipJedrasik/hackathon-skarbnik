@@ -36,6 +36,7 @@
 
 <script>
     import UtilModal from './UtilModal';
+    import { redirectToRoleView } from '@/router/guards'
 
   export default {
     name: 'login-form',
@@ -62,12 +63,14 @@
             await this.$store.dispatch('auth/auth', this.user);
             await this.$store.dispatch('user/update');
 
-            this.$router.push('/app');
+            this.$router.push(redirectToRoleView(null, true));
           }
           catch (e) {
+            console.log(e)
             this.response.content = e;
             this.response.type = 'error';
             this.response.modal = true;
+            this.$emit('operation');
           }
         }
       }

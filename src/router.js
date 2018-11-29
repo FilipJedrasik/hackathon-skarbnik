@@ -25,12 +25,6 @@ const router = new Router({
       beforeEnter: ifNotAuthenticated
     },
     {
-      path: '/app',
-      name: 'app',
-      component: () => import('./views/AppView.vue'),
-      beforeEnter: ifAuthenticated
-    },
-    {
       path: '/change-password',
       name: 'change-password',
       component: () => import('./views/ChangePasswordView.vue'),

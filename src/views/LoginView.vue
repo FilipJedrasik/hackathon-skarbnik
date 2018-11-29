@@ -1,5 +1,5 @@
 <template>
-  <v-app id="inspire">
+  <v-app>
     <transition name="t-fade">
       <v-progress-linear v-if='logging' color="primary" style="position:fixed;top:0;margin:0;" indeterminate></v-progress-linear>
     </transition>
@@ -16,7 +16,7 @@
                 <v-toolbar-title>Logowanie</v-toolbar-title>
               </v-toolbar>
               <v-card-text>
-                <LoginForm @operation="logging = true"/>
+                <LoginForm @operation="logging = !logging"/>
               </v-card-text>
             </v-card>
           </v-flex>

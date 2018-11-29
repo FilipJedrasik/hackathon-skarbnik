@@ -45,11 +45,11 @@ export default {
               'users/' + teacher.id + '/',
               teacher.teacher
           );
-          teacher.teacher = {
+          teacher = {
               ...teacher.teacher,
               password: '********'
           };
-          commit('updateTeacher', teacher.teacher);
+          commit('updateTeacher', teacher);
         } catch(e){
           console.log('teach', e);
         }

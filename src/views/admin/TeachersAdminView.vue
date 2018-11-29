@@ -125,7 +125,7 @@
                     <v-icon
                             color="blue"
                             class="mr-2"
-                            @click="editItem(props.item, props.index)"
+                            @click="editItem(props.item)"
                     >
                         edit
                     </v-icon>
@@ -255,6 +255,7 @@
       async add(){
         if(this.$refs.teacherform.validate()){
           try{
+            this.$emit('async', true);
             this.$store.dispatch('teachers/addTeacher', this.teacher);
 
             this.dialog = false;
@@ -262,14 +263,18 @@
                 email: '',
                 name: '',
                 password: '',
-                role: 1,
-                username: ''
+                username: '',
+                ok: null,
+                cancel: null
             };
+
+            this.$emit('async', false);
 
             this.response.content = 'Udało się dodać nauczyciela';
             this.response.type = 'success';
             this.response.modal = true;
           } catch(e){
+            this.$emit('async', false);
             this.response.content = e;
             this.response.type = 'error';
             this.response.modal = true;
@@ -283,6 +288,8 @@
           try {
             delete this.teacher.password;
 
+            this.$emit('async', true);
+
             this.$store.dispatch('teachers/updateTeacher', {
               teacher: this.teacher,
               id: this.teacher.id_field
@@ -294,15 +301,18 @@
               email: '',
               name: '',
               password: '',
-              role: 1,
               username: ''
             });
+
+            this.$emit('async', false);
 
             this.response.content = 'Udało się zaaktualizować nauczyciela';
             this.response.type = 'success';
             this.response.modal = true;
           }
           catch (e) {
+            this.$emit('async', false);
+
             this.response.content = e;
             this.response.type = 'error';
             this.response.modal = true;
@@ -312,7 +322,7 @@
 
       // Opening editing teacher modal
       // Preparing essential variables
-      editItem (teacher, index) {
+      editItem (teacher) {
         this.editedIndex = this.teachers.findIndex(v => v.id_field === teacher.id_field);
         this.beforeEdit = Object.assign({}, teacher);
         this.teacher = Object.assign({}, teacher);
@@ -321,7 +331,7 @@
 
       // Opening delete teacher modal
       // Preparing essential variables
-      deleteItem (teacher, index) {
+      deleteItem (teacher) {
         this.response.header = 'Uwaga';
         this.response.content = `Czy na pewno chcesz usunąć konto ${teacher.name}?`;
         this.response.ok = 'Tak';
@@ -336,6 +346,7 @@
       // Deleting existing teacher
       async asDeleteTeacher(){
         try{
+          this.$emit('async', true);
           await this.$store.dispatch('teachers/deleteTeacher', this.deletingTeacher.teacher.id_field);
 
           this.response.modal = false;
@@ -345,7 +356,10 @@
             index: null
           };
 
+          this.$emit('async', false);
+
         } catch(e){
+          this.$emit('async', false);
           this.response.content = e;
           this.response.type = 'error';
           this.response.modal = true;

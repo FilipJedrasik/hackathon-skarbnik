@@ -3,7 +3,7 @@ import Vue from 'vue'
 export default {
   namespaced: true,
   state: {
-    parents: {}
+    parents: []
   },
 
   getters: {
@@ -15,11 +15,12 @@ export default {
       state.parents = payload;
     },
     updateParents(state, payload){
-      Vue.set(state.parents, payload.pos, payload.teacher)
-      //state.parents[payload.id] = payload.parents;
+      console.log(state.parents)
+      console.log(payload)
+      Vue.set(state.parents, state.parents.findIndex(v => v.id_field == payload.id_field), payload)
     },
-    deleteParents(state, payload){
-      state.parents.split(payload, 1);
+    deleteParents(state, parentId){
+      state.parents.splice(state.parents.findIndex(v => v.id_field == parentId), 1);
     },
     addParent(state, payload){
       state.parents.push(payload);
@@ -33,9 +34,7 @@ export default {
 
         const result = data.map(v => ({
           ...v,
-          id: v.id_field,
-          password: v.password.length <= 8 ? v.password : '********',
-          login: v.username
+          password: v.password.length <= 8 ? v.password : '********'
         }));
         commit('setParents', result);
       } catch(e){
@@ -45,11 +44,11 @@ export default {
     updateParent: async ({commit}, parent) => {
       try{
         await Vue.axios.patch(
-            'users/' + parent.teacher.id + '/',
-            parent.teacher
+            'users/' + parent.id + '/',
+            parent.parent
         );
-        parent.teacher = {
-          ...parent.teacher,
+        parent = {
+          ...parent.parent,
           password: '********'
         };
         commit('updateParents', parent);
@@ -57,10 +56,10 @@ export default {
         console.log('parent', e);
       }
     },
-    deleteParent: async ({commit}, parent) => {
+    deleteParent: async ({commit}, parentId) => {
       try{
         await Vue.axios.delete(
-            'users/' + parent.id + '/'
+            'users/' + parentId + '/'
         );
         commit('deleteParents', parent);
       } catch(e){
@@ -71,7 +70,10 @@ export default {
       try{
         await Vue.axios.post(
             'users/',
-            parent
+            {
+              ...parent,
+              role: 0
+            }
         );
         commit('addParent', parent);
       } catch(e){

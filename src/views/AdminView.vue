@@ -1,5 +1,8 @@
 <template>
-    <v-app id="inspire">
+    <v-app>
+        <transition name="t-fade">
+            <v-progress-linear v-if='asyncAction' color="blue" style="position:fixed;top:0;margin:0;z-index:1000;" indeterminate></v-progress-linear>
+        </transition>
         <v-navigation-drawer
                 :clipped="$vuetify.breakpoint.lgAndUp"
                 v-model="drawer"
@@ -63,7 +66,7 @@
         <v-content>
             <v-container fluid fill-height>
                 <v-layout justify-center align-start>
-                    <router-view></router-view>
+                    <router-view @async="asyncAction = $event"></router-view>
                 </v-layout>
             </v-container>
         </v-content>
@@ -82,6 +85,7 @@
     data: () => ({
       dialog: false,
       drawer: null,
+      asyncAction: false,
       items: [
         { icon: 'dashboard', text: 'Strona główna', target: '/admin/' },
         { icon: 'school', text: 'Nauczyciele', target: '/admin/teachers' },

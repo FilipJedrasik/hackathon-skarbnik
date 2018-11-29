@@ -7,18 +7,27 @@ const updateBefore = async () => {
   await store.dispatch('user/update');
 };
 
-const redirectToRoleView = (next) => {
+export const redirectToRoleView = (next, routerPushMode) => {
   switch(store.getters['user/getRole']){
     case 0:{
-      next('/parent/');
+      if(routerPushMode === true)
+        return 'parent';
+      else
+        next('/parent/');
       return;
     }
     case 1:{
-      next('/supervisor/');
+      if(routerPushMode === true)
+        return 'supervisor';
+      else
+        next('/supervisor/');
       return;
     }
     case 2:{
-      next('/admin/');
+      if(routerPushMode === true)
+        return 'admin';
+      else
+        next('/admin/');
       return;
     }
   }
