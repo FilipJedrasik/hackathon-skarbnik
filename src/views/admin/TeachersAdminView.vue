@@ -256,7 +256,7 @@
         if(this.$refs.teacherform.validate()){
           try{
             this.$emit('async', true);
-            this.$store.dispatch('teachers/addTeacher', this.teacher);
+            await this.$store.dispatch('teachers/addTeacher', this.teacher);
 
             this.dialog = false;
             this.teacher = {
@@ -290,7 +290,7 @@
 
             this.$emit('async', true);
 
-            this.$store.dispatch('teachers/updateTeacher', {
+            await this.$store.dispatch('teachers/updateTeacher', {
               teacher: this.teacher,
               id: this.teacher.id_field
             });

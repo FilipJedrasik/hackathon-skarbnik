@@ -28,8 +28,8 @@ export default {
   actions: {
     getStudents: async ({commit}) => {
       try{
-        let {data} = await Vue.axios.get(process.env.VUE_APP_ROUTES_GET_STUDENTS);
-        commit('setStudents', data.students);
+        let { data } = await Vue.axios.get('student/');
+        commit('setStudents', data);
       } catch(e){
         console.log('Students', e);
       }

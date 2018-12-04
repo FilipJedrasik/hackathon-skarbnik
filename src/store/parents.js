@@ -15,8 +15,6 @@ export default {
       state.parents = payload;
     },
     updateParents(state, payload){
-      console.log(state.parents)
-      console.log(payload)
       Vue.set(state.parents, state.parents.findIndex(v => v.id_field == payload.id_field), payload)
     },
     deleteParents(state, parentId){

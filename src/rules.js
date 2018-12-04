@@ -5,6 +5,10 @@ const capitalPolishLastname = /^[A-Z][a-z,ąćęóźśłżń-]+$/;
 
 Vue.mixin({
   data: () => ({
+    classnameRules:[
+      v => v && v.length >= 3 || "Za krótka nazwa klasy",
+      v => v && /\d[A-Z]+\d$/.test(v) || "Błędna nazwa klasy"
+    ],
     nameRules: [
       v => !!v || 'Imię i nazwisko jest wymagane',
       v => (v && v.length >= 5) || 'Imię i nazwisko musi mieć conajmniej 7 znaków',

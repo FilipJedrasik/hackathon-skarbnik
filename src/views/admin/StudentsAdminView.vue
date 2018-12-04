@@ -125,7 +125,7 @@
                     <v-icon
                             color="blue"
                             class="mr-2"
-                            @click="editItem(props.item)"
+                            @click="editItem(props.item, props.index)"
                     >
                         edit
                     </v-icon>
@@ -257,7 +257,7 @@
           try{
             this.$emit('async', true);
 
-            await this.$store.dispatch('parents/addParent', this.parent);
+            this.$store.dispatch('parents/addParent', this.parent);
 
             this.dialog = false;
             this.parent = {
@@ -289,7 +289,7 @@
 
             this.$emit('async', true);
 
-            await this.$store.dispatch('parents/updateParent', {
+            this.$store.dispatch('parents/updateParent', {
               parent: this.parent,
               id: this.parent.id_field
             });
@@ -307,8 +307,6 @@
 
             this.response.content = 'Udało się zaaktualizować konto rodzica';
             this.response.type = 'success';
-            this.response.ok = 'OK';
-            this.response.cancel = null;
             this.response.modal = true;
           }
           catch (e) {
@@ -372,7 +370,7 @@
       // Opening Add Teacher Modal
       showAddModal(){
         this.editedIndex = -1;
-        this.parent = {
+        this.teacher = {
           email: null,
           name: null,
           password: null,
@@ -390,7 +388,7 @@
 
     async created(){
       this.loading = true;
-      await this.$store.dispatch('parents/getParents');
+      await this.$store.dispatch('students/getStudents');
       this.loading = false;
     }
   }

@@ -54,6 +54,11 @@ const router = new Router({
           component: () => import('./views/admin/ParentsAdminView.vue')
         },
         {
+          path: 'students',
+          name: 'admin-students',
+          component: () => import('./views/admin/StudentsAdminView.vue')
+        },
+        {
           path: 'classes',
           name: 'admin-classes',
           component: () => import('./views/admin/ClassesAdminView.vue')

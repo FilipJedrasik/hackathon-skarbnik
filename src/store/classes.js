@@ -3,13 +3,15 @@ import Vue from 'vue'
 export default {
   namespaced: true,
   state: {
-    classes: {},
-    freeTeachers: null
+    classes: [],
+    freeTeachers: [],
+    loadedTeachers: false
   },
 
   getters: {
     getClasses: state => state.classes,
-    getFreeTeachers: state => state.freeTeachers
+    getFreeTeachers: state => state.freeTeachers,
+    loadedFreeTeachers: state => state.loadedTeachers
   },
 
   mutations: {
@@ -18,15 +20,23 @@ export default {
     },
     setFreeTeachers(state, payload){
       state.freeTeachers = payload;
+      state.loadedTeachers = true;
     },
     updateClasses(state, payload){
-      state.classes[payload.id] = payload.classes;
+      const pos = state.classes.findIndex(v => v.id_field == payload.id_field);
+      Vue.set(state.classes, pos, payload)
+      Vue.set(state.classes[pos], 'user', payload.user)
     },
     deleteClasses(state, payload){
-      state.classes.split(payload, 1);
+      console.log(payload)
+      state.classes.splice(state.classes.findIndex(v => v.id_field == payload.id), 1);
+      if(state.loadedTeachers){
+        state.freeTeachers.splice(0, 0, payload.teacher);
+      }
     },
-    addClasses(state, payload){
+    addClass(state, payload){
       state.classes.push(payload);
+      state.freeTeachers.splice(state.freeTeachers.findIndex(v => v.id_field === payload.user.id_field), 1);
     }
   },
 
@@ -34,12 +44,8 @@ export default {
     getClasses: async ({commit}) => {
       try{
         let {data} = await Vue.axios.get('class/');
-        //console.log(data)
-        const result = data.map(v => ({
-          id: v.id_field,
-          name: v.name
-        }));
-        commit('setClasses', result);
+
+        commit('setClasses', data);
       } catch(e){
         console.log('clas', e);
       }
@@ -47,11 +53,12 @@ export default {
     getFreeTeachers: async ({commit}) => {
       try{
         let {data} = await Vue.axios.get('teachers/');
-        //console.log(data)
+
         const result = data.map(v => ({
-          id: v.id_field,
+          id_field: v.id_field,
           name: v.name
         }));
+
         commit('setFreeTeachers', result);
       } catch(e){
         console.log('clas', e);
@@ -59,30 +66,41 @@ export default {
     },
     updateClass: async ({commit}, clas) => {
       try{
-        await Vue.axios.put(
-            process.env.VUE_APP_ROUTES_UPDATE_CLASS + clas.id,
-            clas
+        // Cuz of database struct
+        const payload = {
+          name: clas.name,
+          user: clas.user.id_field
+        };
+
+        await Vue.axios.patch(
+            `class/${clas.id_field}/`,
+            payload
         );
-        commit('updateClass', clas);
+        commit('updateClasses', clas);
       } catch(e){
         console.log('clas', e);
       }
     },
-    deleteClass: async ({commit}, clas) => {
+    deleteClass: async ({commit}, {id, teacher}) => {
       try{
-        await Vue.axios.put(
-            process.env.VUE_APP_ROUTES_DELETE_CLASS + clas
+        await Vue.axios.delete(
+            `class/${id}/`
         );
-        commit('deleteClass', clas);
+        commit('deleteClasses', {id, teacher});
       } catch(e){
         console.log('clas', e);
       }
     },
     addClass: async ({commit}, clas) => {
       try{
+        const payload = {
+          name: clas.name,
+          user: clas.user.id_field
+        };
+
         await Vue.axios.post(
-            process.env.VUE_APP_ROUTES_ADD_CLASS,
-            clas
+            'class/',
+            payload
         );
         commit('addClass', clas);
       } catch(e){

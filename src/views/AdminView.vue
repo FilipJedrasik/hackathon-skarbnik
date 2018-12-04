@@ -9,7 +9,7 @@
                 fixed
                 app
         >
-            <v-toolbar color="secondary" dark class="transparent">
+            <v-toolbar color="secondary" dark class="transparent" v-if="!$vuetify.breakpoint.lgAndUp">
                 <v-list class="pa-0">
                     <v-list-tile avatar>
                         <v-list-tile-avatar>
