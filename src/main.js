@@ -1,7 +1,8 @@
 import Vue from 'vue'
 import axios from 'axios'
 import VueAxios from 'vue-axios'
-import './rules'
+import Rules from './rules'
+import Async from './mixins/async'
 
 Vue.use(VueAxios, axios);
 
@@ -14,6 +15,12 @@ import router from './router'
 import store from './store'
 
 Vue.config.productionTip = false
+
+Vue.mixin({
+  data: () => (Rules)
+});
+
+Vue.mixin(Async);
 
 new Vue({
   router,

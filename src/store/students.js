@@ -3,7 +3,17 @@ import Vue from 'vue'
 export default {
   namespaced: true,
   state: {
-    students: {}
+    students: {},
+    /*
+    * id_field
+    * name
+    * class_field
+    *   id
+    *   name
+    * user(parent)
+    *   id_field
+    *   name
+    * */
   },
 
   getters: {
@@ -14,13 +24,13 @@ export default {
     setStudents(state, payload){
       state.students = payload;
     },
-    updateStudents(state, payload){
-      state.students[payload.id] = payload.students;
+    updateStudent(state, payload){
+      Vue.set(state.students, state.students.findIndex(v => v.id_field == payload.id), payload.student)
     },
     deleteStudents(state, payload){
       state.students.split(payload, 1);
     },
-    addStudents(state, payload){
+    addStudent(state, payload){
       state.students.push(payload);
     }
   },
@@ -34,34 +44,45 @@ export default {
         console.log('Students', e);
       }
     },
-    updateClass: async ({commit}, student) => {
+    updateStudent: async ({commit}, student) => {
       try{
+        const values = {
+          name: student.student.name,
+          user: student.student.user.id_field,
+          class_field: student.student.class_field.id_field
+        };
+
         await Vue.axios.put(
-            process.env.VUE_APP_ROUTES_UPDATE_STUDENT + student.id,
-            student
+            `student/${student.id}/`,
+            values
         );
-        commit('updateClass', student);
+        commit('updateStudent', student);
       } catch(e){
         console.log('Students', e);
       }
     },
-    deleteClass: async ({commit}, student) => {
+    deleteStudent: async ({commit}, student) => {
       try{
-        await Vue.axios.put(
-            process.env.VUE_APP_ROUTES_DELETE_STUDENT + student
+        await Vue.axios.delete(
+            `student/${student.id}/`
         );
-        commit('deleteClass', student);
+        commit('deleteStudent', student);
       } catch(e){
         console.log('Students', e);
       }
     },
-    addClass: async ({commit}, student) => {
+    addStudent: async ({commit}, student) => {
       try{
+        const values = {
+          name: student.name,
+          user: student.user.id_field,
+          class_field: student.class_field.id_field
+        };
         await Vue.axios.post(
-            process.env.VUE_APP_ROUTES_ADD_STUDENT,
-            student
+            'student/',
+            values
         );
-        commit('addClass', student);
+        commit('addStudent', student);
       } catch(e){
         console.log('Students', e);
       }

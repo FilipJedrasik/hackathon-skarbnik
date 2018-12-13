@@ -26,7 +26,8 @@
                     <v-btn
                             v-if="ok !== undefined"
                             v-bind:color="type === 'warning' ? 'black' : 'white'"
-                            flat=""
+                            flat
+                            :disabled="okDisabled"
                             @click.native="$emit('ok')"
                     >{{ok}}</v-btn>
                 </div>
@@ -46,6 +47,7 @@
       content: String,
       cancel: String,
       ok: String,
+      okDisabled: Boolean,
       value: Boolean
     },
     data(){

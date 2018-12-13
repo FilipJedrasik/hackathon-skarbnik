@@ -9,6 +9,7 @@
                 :cancel="response.cancel !== null ? response.cancel : undefined"
                 @ok="asDeleteTeacher"
                 @cancel="response.modal = false"
+                :okDisabled="processing"
                 v-model="response.modal"></util-modal>
 
         <!--HEADER - TEACHERS-->
@@ -92,7 +93,7 @@
                                 <v-btn
                                         color="primary"
                                         @click.native="editedIndex === -1 ? add() : edit()"
-                                        :disabled="!valid || JSON.stringify(teacher) === JSON.stringify(beforeEdit)"
+                                        :disabled="!valid || JSON.stringify(teacher) === JSON.stringify(beforeEdit) || processing"
                                 >{{submitTitle}}</v-btn>
                             </div>
                         </v-card-text>
@@ -158,8 +159,18 @@
 <script>
   import UtilModal from '@/components/UtilModal';
 
+  const basic = {
+    email: '',
+    name: '',
+    password: '',
+    username: '',
+    ok: null,
+    cancel: null
+  };
+
   export default {
     data: () => ({
+      processing: false, // Currently doing async operation
       loading: false, // Is data being fetched from the server now?
       dialog: false, // Adding/editing Modal stance
       valid: false, // is Adding/editing form valid?
@@ -174,12 +185,7 @@
         cancel: null
       },
 
-      teacher: { // Currently adding/editing Teacher
-        email: '',
-        name: '',
-        password: '',
-        username: ''
-      },
+      teacher: basic, // Currently adding/editing Teacher,
 
       deletingTeacher: { // Teacher to delete
         teacher: {}, // Teacher Object
@@ -254,27 +260,24 @@
       // Adding new teacher
       async add(){
         if(this.$refs.teacherform.validate()){
+
+          this.response.ok = null;
+          this.response.cancel = null;
+
           try{
-            this.$emit('async', true);
+            this.asyncProcess(true);
             await this.$store.dispatch('teachers/addTeacher', this.teacher);
 
             this.dialog = false;
-            this.teacher = {
-                email: '',
-                name: '',
-                password: '',
-                username: '',
-                ok: null,
-                cancel: null
-            };
+            this.teacher = Object.assign({}, basic);
 
-            this.$emit('async', false);
+            this.asyncProcess(false);
 
             this.response.content = 'Udało się dodać nauczyciela';
             this.response.type = 'success';
             this.response.modal = true;
           } catch(e){
-            this.$emit('async', false);
+            this.asyncProcess(false);
             this.response.content = e;
             this.response.type = 'error';
             this.response.modal = true;
@@ -285,10 +288,14 @@
       // Editing existing teacher
       async edit(){
         if(this.$refs.teacherform.validate()) {
+
+          this.response.ok = null;
+          this.response.cancel = null;
+
           try {
             delete this.teacher.password;
 
-            this.$emit('async', true);
+            this.asyncProcess(true);
 
             await this.$store.dispatch('teachers/updateTeacher', {
               teacher: this.teacher,
@@ -297,21 +304,16 @@
 
             this.dialog = false;
 
-            this.teacher = Object.assign({}, {
-              email: '',
-              name: '',
-              password: '',
-              username: ''
-            });
+            this.teacher = Object.assign({}, basic);
 
-            this.$emit('async', false);
+            this.asyncProcess(false);
 
             this.response.content = 'Udało się zaaktualizować nauczyciela';
             this.response.type = 'success';
             this.response.modal = true;
           }
           catch (e) {
-            this.$emit('async', false);
+            this.asyncProcess(false);
 
             this.response.content = e;
             this.response.type = 'error';
@@ -346,7 +348,7 @@
       // Deleting existing teacher
       async asDeleteTeacher(){
         try{
-          this.$emit('async', true);
+          this.asyncProcess(true);
           await this.$store.dispatch('teachers/deleteTeacher', this.deletingTeacher.teacher.id_field);
 
           this.response.modal = false;
@@ -356,10 +358,10 @@
             index: null
           };
 
-          this.$emit('async', false);
+          this.asyncProcess(false);
 
         } catch(e){
-          this.$emit('async', false);
+          this.asyncProcess(false);
           this.response.content = e;
           this.response.type = 'error';
           this.response.modal = true;
@@ -372,12 +374,8 @@
       // Opening Add Teacher Modal
       showAddModal(){
         this.editedIndex = -1;
-        this.teacher = {
-          email: null,
-          name: null,
-          password: null,
-          username: null
-        };
+        this.teacher = Object.assign({}, basic);
+        this.beforeEdit = Object.assign({}, basic);
 
         this.$refs.teacherform.resetValidation();
 
