@@ -10,6 +10,8 @@ import students from './store/students'
 import payments from './store/payments'
 import payment_details from './store/payment_details'
 
+import counter from './store/counter'
+
 Vue.use(Vuex)
 
 export default new Vuex.Store({
@@ -21,6 +23,7 @@ export default new Vuex.Store({
     classes,
     payments,
     payment_details,
-    students
+    students,
+    counter
   }
 })

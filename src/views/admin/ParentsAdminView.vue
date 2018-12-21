@@ -158,13 +158,20 @@
 <script>
   import UtilModal from '@/components/UtilModal';
 
+  const basic = { // Currently adding/editing Parent
+    email: '',
+    name: '',
+    password: '',
+    username: ''
+  };
+
   export default {
     data: () => ({
       loading: false, // Is data being fetched from the server now?
       dialog: false, // Adding/editing Modal stance
       valid: false, // is Adding/editing form valid?
 
-      beforeEdit: {}, // Editing teacher start stance
+      beforeEdit: {}, // Editing parent start stance
 
       response:{ // UI Util response obj
         type: 'error',
@@ -174,19 +181,14 @@
         cancel: null
       },
 
-      parent: { // Currently adding/editing Teacher
-        email: '',
-        name: '',
-        password: '',
-        username: ''
+      parent: basic, // Currently adding/editing Parent
+
+      deletingParent: { // Parent to delete
+        parent: {}, // Parent Object
+        index: null // ID in $store.parents Array
       },
 
-      deletingParent: { // Teacher to delete
-        parent: {}, // Teacher Object
-        index: null // ID in $store.teachers Array
-      },
-
-      editedIndex: -1 // Currently edited Index in $store.teachers Array
+      editedIndex: -1 // Currently edited Index in $store.parents Array
     }),
 
     computed: {
@@ -251,29 +253,28 @@
     },
 
     methods: {
-      // Adding new teacher
+      // Adding new parent
       async add(){
         if(this.$refs.parentform.validate()){
+
+          this.response.ok = null;
+          this.response.cancel = null;
+
           try{
-            this.$emit('async', true);
+            this.asyncProcess(true);
 
             await this.$store.dispatch('parents/addParent', this.parent);
 
             this.dialog = false;
-            this.parent = {
-              email: '',
-              name: '',
-              password: '',
-              username: ''
-            };
+            this.parent = Object.assign({}, basic);
 
-            this.$emit('async', false);
+            this.asyncProcess(false);
 
             this.response.content = 'Udało się dodać konto rodzica';
             this.response.type = 'success';
             this.response.modal = true;
           } catch(e){
-            this.$emit('async', false);
+            this.asyncProcess(false);
             this.response.content = e;
             this.response.type = 'error';
             this.response.modal = true;
@@ -281,13 +282,17 @@
         }
       },
 
-      // Editing existing teacher
+      // Editing existing parent
       async edit(){
         if(this.$refs.parentform.validate()) {
+
+          this.response.ok = null;
+          this.response.cancel = null;
+
           try {
             delete this.parent.password;
 
-            this.$emit('async', true);
+            this.asyncProcess(true);
 
             await this.$store.dispatch('parents/updateParent', {
               parent: this.parent,
@@ -296,14 +301,9 @@
 
             this.dialog = false;
 
-            this.parent = Object.assign({}, {
-              email: '',
-              name: '',
-              password: '',
-              username: ''
-            });
+            this.parent = Object.assign({}, basic);
 
-            this.$emit('async', false);
+            this.asyncProcess(false);
 
             this.response.content = 'Udało się zaaktualizować konto rodzica';
             this.response.type = 'success';
@@ -312,7 +312,7 @@
             this.response.modal = true;
           }
           catch (e) {
-            this.$emit('async', false);
+            this.asyncProcess(false);
             this.response.content = e;
             this.response.type = 'error';
             this.response.modal = true;
@@ -320,7 +320,7 @@
         }
       },
 
-      // Opening editing teacher modal
+      // Opening editing parent modal
       // Preparing essential variables
       editItem (parent) {
         this.editedIndex = this.parents.findIndex(v => v.id_field === parent.id_field);
@@ -329,7 +329,7 @@
         this.dialog = true;
       },
 
-      // Opening delete teacher modal
+      // Opening delete parent modal
       // Preparing essential variables
       deleteItem (parent) {
         this.response.header = 'Uwaga';
@@ -343,10 +343,10 @@
         this.deletingParent.index = this.parents.findIndex(v => v.id_field === parent.id_field);
       },
 
-      // Deleting existing teacher
+      // Deleting existing Parent
       async asDeleteParent(){
         try{
-          this.$emit('async', true);
+          this.asyncProcess(true);
           await this.$store.dispatch('parents/deleteParent', this.deletingParent.parent.id_field);
 
           this.response.modal = false;
@@ -356,10 +356,10 @@
             index: null
           };
 
-          this.$emit('async', false);
+          this.asyncProcess(false);
 
         } catch(e){
-          this.$emit('async', false);
+          this.asyncProcess(false);
           this.response.content = e;
           this.response.type = 'error';
           this.response.modal = true;
@@ -369,15 +369,10 @@
       },
 
       // Clearing edit's variables
-      // Opening Add Teacher Modal
+      // Opening Add Parent Modal
       showAddModal(){
         this.editedIndex = -1;
-        this.parent = {
-          email: null,
-          name: null,
-          password: null,
-          username: null
-        };
+        this.parent = basic;
 
         this.$refs.parentform.resetValidation();
 

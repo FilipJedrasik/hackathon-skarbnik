@@ -163,9 +163,7 @@
     email: '',
     name: '',
     password: '',
-    username: '',
-    ok: null,
-    cancel: null
+    username: ''
   };
 
   export default {

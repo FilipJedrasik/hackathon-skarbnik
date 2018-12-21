@@ -73,7 +73,7 @@ const router = new Router({
     {
       path: '/supervisor',
       name: 'supervisor',
-      component: () => import('./views/supervisor/WelcomeSupervisorView.vue'),
+      component: () => import('./views/SupervisorView.vue'),
       beforeEnter: isSupervisor,
       children: [
         {

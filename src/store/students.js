@@ -27,8 +27,8 @@ export default {
     updateStudent(state, payload){
       Vue.set(state.students, state.students.findIndex(v => v.id_field == payload.id), payload.student)
     },
-    deleteStudents(state, payload){
-      state.students.split(payload, 1);
+    deleteStudent(state, studentId){
+      state.students.splice(state.students.findIndex(v => v.id_field == studentId), 1);
     },
     addStudent(state, payload){
       state.students.push(payload);
@@ -64,7 +64,7 @@ export default {
     deleteStudent: async ({commit}, student) => {
       try{
         await Vue.axios.delete(
-            `student/${student.id}/`
+            `student/${student}/`
         );
         commit('deleteStudent', student);
       } catch(e){

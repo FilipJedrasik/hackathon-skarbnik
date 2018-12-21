@@ -1,63 +1,41 @@
 <template>
-  <v-app id="inspire">
+  <v-app>
+    <transition name="t-fade">
+      <v-progress-linear v-if='asyncAction' color="blue" style="position:fixed;top:0;margin:0;z-index:1000;" indeterminate></v-progress-linear>
+    </transition>
     <v-navigation-drawer
             :clipped="$vuetify.breakpoint.lgAndUp"
             v-model="drawer"
             fixed
             app
     >
+      <v-toolbar color="secondary" dark class="transparent" v-if="!$vuetify.breakpoint.lgAndUp">
+        <v-list class="pa-0">
+          <v-list-tile avatar>
+            <v-list-tile-avatar>
+              <v-icon class="drawer-header-icon" dark>account_circle</v-icon>
+            </v-list-tile-avatar>
+
+            <v-list-tile-content>
+              <v-list-tile-title class="drawer-header-name">{{$store.getters['user/getUser'].name}}</v-list-tile-title>
+            </v-list-tile-content>
+          </v-list-tile>
+        </v-list>
+      </v-toolbar>
+
+      <v-divider></v-divider>
+
       <v-list dense>
         <template v-for="item in items">
-          <v-layout
-                  v-if="item.heading"
-                  :key="item.heading"
-                  row
-                  align-center
-          >
-            <v-flex xs6>
-              <v-subheader v-if="item.heading">
-                {{ item.heading }}
-              </v-subheader>
-            </v-flex>
-            <v-flex xs6 class="text-xs-center">
-              <a href="#!" class="body-2 black--text">EDIT</a>
-            </v-flex>
-          </v-layout>
-          <v-list-group
-                  v-else-if="item.children"
-                  v-model="item.model"
+          <v-list-tile
                   :key="item.text"
-                  :prepend-icon="item.model ? item.icon : item['icon-alt']"
-                  append-icon=""
-          >
-            <v-list-tile slot="activator">
-              <v-list-tile-content>
-                <v-list-tile-title>
-                  {{ item.text }}
-                </v-list-tile-title>
-              </v-list-tile-content>
-            </v-list-tile>
-            <v-list-tile
-                    v-for="(child, i) in item.children"
-                    :key="i"
-                    @click=""
-            >
-              <v-list-tile-action v-if="child.icon">
-                <v-icon>{{ child.icon }}</v-icon>
-              </v-list-tile-action>
-              <v-list-tile-content>
-                <v-list-tile-title>
-                  {{ child.text }}
-                </v-list-tile-title>
-              </v-list-tile-content>
-            </v-list-tile>
-          </v-list-group>
-          <v-list-tile v-else :key="item.text" @click="">
+                  :disabled="fullPath == item.target"
+                  @click="fullPath != item.target ? $router.push(item.target) : ''">
             <v-list-tile-action>
-              <v-icon>{{ item.icon }}</v-icon>
+              <v-icon :color="fullPath == item.target ? 'primary' : ''">{{ item.icon }}</v-icon>
             </v-list-tile-action>
             <v-list-tile-content>
-              <v-list-tile-title>
+              <v-list-tile-title :class="{ 'drawer-menu-current': fullPath == item.target }">
                 {{ item.text }}
               </v-list-tile-title>
             </v-list-tile-content>
@@ -72,20 +50,14 @@
             app
             fixed
     >
-      <v-toolbar-title style="width: 300px" class="ml-0">
+      <v-toolbar-title style="width: 300px; display:flex; align-items: center;" class="ml-0">
         <v-toolbar-side-icon @click.stop="drawer = !drawer"></v-toolbar-side-icon>
-        <span class="hidden-sm-and-down">Google Contacts</span>
+        <span class="hidden-sm-and-down">Skarbnik</span>
       </v-toolbar-title>
-      <v-text-field
-              flat
-              solo-inverted
-              hide-details
-              prepend-inner-icon="search"
-              label="Search"
-              class="hidden-sm-and-down"
-      ></v-text-field>
 
-      <h3>Skarbnik</h3>
+      <v-spacer></v-spacer>
+      <v-spacer></v-spacer>
+      <h3 style="white-space:nowrap;">{{firstName}}</h3>
 
       <v-btn icon>
         <v-icon>notifications</v-icon>
@@ -93,8 +65,8 @@
     </v-toolbar>
     <v-content>
       <v-container fluid fill-height>
-        <v-layout justify-center align-center>
-          Supervisor
+        <v-layout justify-center align-start>
+          <router-view @async="asyncAction = $event"></router-view>
         </v-layout>
       </v-container>
     </v-content>
@@ -103,6 +75,7 @@
 
 <script>
   export default {
+    name: 'SupervisorViewLayout',
     beforeRouteEnter (to, from, next) {
       if(to.fullPath === '/supervisor')
         next('/supervisor/');
@@ -112,39 +85,21 @@
     data: () => ({
       dialog: false,
       drawer: null,
+      asyncAction: false,
       items: [
-        { icon: 'contacts', text: 'Contacts' },
-        { icon: 'history', text: 'Frequently contacted' },
-        { icon: 'content_copy', text: 'Duplicates' },
-        {
-          icon: 'keyboard_arrow_up',
-          'icon-alt': 'keyboard_arrow_down',
-          text: 'Labels',
-          model: true,
-          children: [
-            { icon: 'add', text: 'Create label' }
-          ]
-        },
-        {
-          icon: 'keyboard_arrow_up',
-          'icon-alt': 'keyboard_arrow_down',
-          text: 'More',
-          model: false,
-          children: [
-            { text: 'Import' },
-            { text: 'Export' },
-            { text: 'Print' },
-            { text: 'Undo changes' },
-            { text: 'Other contacts' }
-          ]
-        },
-        { icon: 'settings', text: 'Settings' },
-        { icon: 'chat_bubble', text: 'Send feedback' },
-        { icon: 'help', text: 'Help' },
-        { icon: 'phonelink', text: 'App downloads' },
-        { icon: 'keyboard', text: 'Go to the old version' }
+        { icon: 'dashboard', text: 'Strona główna', target: '/supervisor/' },
+        { icon: 'school', text: 'Zbiórki', target: '/supervisor/payments' },
+        { icon: 'exit_to_app', text: 'Wyloguj', target: '/logout' }
       ]
     }),
+    computed:{
+      firstName(){
+        return this.$store.getters['user/getUser'].name.split(' ')[0];
+      },
+      fullPath(){
+        return this.$route.path;
+      }
+    },
     props: {
       source: String
     }

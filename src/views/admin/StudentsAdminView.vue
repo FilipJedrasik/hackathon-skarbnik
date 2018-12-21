@@ -9,6 +9,7 @@
                 :cancel="response.cancel !== null ? response.cancel : undefined"
                 @ok="asDeleteStudent"
                 @cancel="response.modal = false"
+                :okDisabled="processing"
                 v-model="response.modal"></util-modal>
 
         <!--HEADER - TEACHERS-->
@@ -162,6 +163,7 @@
 
   export default {
     data: () => ({
+      loadedFullData: false,
       loading: false, // Is data being fetched from the server now?
       dialog: false, // Adding/editing Modal stance
       valid: false, // is Adding/editing form valid?
@@ -244,21 +246,26 @@
       // Adding new teacher
       async add(){
         if(this.$refs.studentform.validate()){
+
+          this.response.ok = null;
+          this.response.cancel = null;
+
           try{
-            this.$emit('async', true);
+            this.asyncProcess(true);
+            this.fillNames();
 
             this.$store.dispatch('students/addStudent', this.student);
 
             this.dialog = false;
-            this.student = Object.assign({}, basic);
+            this.student = JSON.parse(JSON.stringify(basic));
 
-            this.$emit('async', false);
+            this.asyncProcess(false);
 
             this.response.content = 'Udało się dodać ucznia';
             this.response.type = 'success';
             this.response.modal = true;
           } catch(e){
-            this.$emit('async', false);
+            this.asyncProcess(false);
             this.response.content = e;
             this.response.type = 'error';
             this.response.modal = true;
@@ -269,11 +276,15 @@
       // Editing existing teacher
       async edit(){
         if(this.$refs.studentform.validate()) {
-          try {
-            this.$emit('async', true);
 
-            this.student.user.name = this.parents.find(v => v.id_field === this.student.user.id_field).name;
-            this.student.class_field.name = this.classes.find(v => v.id_field === this.student.class_field.id_field).name;
+          this.response.ok = null;
+          this.response.cancel = null;
+
+          try {
+            this.asyncProcess(true);
+            this.fillNames();
+
+            //console.log(this.student);
 
             this.$store.dispatch('students/updateStudent', {
               student: this.student,
@@ -284,14 +295,14 @@
 
             this.student = Object.assign({}, basic);
 
-            this.$emit('async', false);
+            this.asyncProcess(false);
 
             this.response.content = 'Udało się zaaktualizować studenta';
             this.response.type = 'success';
             this.response.modal = true;
           }
           catch (e) {
-            this.$emit('async', false);
+            this.asyncProcess(false);
             this.response.content = e;
             this.response.type = 'error';
             this.response.modal = true;
@@ -328,7 +339,7 @@
       // Deleting existing teacher
       async asDeleteStudent(){
         try{
-          this.$emit('async', true);
+          this.asyncProcess(true);
           await this.$store.dispatch('students/deleteStudent', this.deletingStudent.student.id_field);
 
           this.response.modal = false;
@@ -338,10 +349,10 @@
             index: null
           };
 
-          this.$emit('async', false);
+          this.asyncProcess(false);
 
         } catch(e){
-          this.$emit('async', false);
+          this.asyncProcess(false);
           this.response.content = e;
           this.response.type = 'error';
           this.response.modal = true;
@@ -354,32 +365,33 @@
       // Opening Add Teacher Modal
       async showAddModal(){
         this.editedIndex = -1;
-        this.student =  {
-          name: '',
-              class_field: {
-            id: null,
-                name: ''
-          },
-          user: {
-            id_field: null,
-                name: ''
-          }
-        };
+        this.student = JSON.parse(JSON.stringify(basic));
 
         this.beforeEdit = JSON.parse(JSON.stringify(this.student));
 
         this.$refs.studentform.resetValidation();
 
-        this.parentsAndTeachers();
+        await this.parentsAndTeachers();
 
         this.dialog = true;
       },
 
       async parentsAndTeachers(){
-        this.$emit('async', true);
-        await this.$store.dispatch('parents/getParents');
-        await this.$store.dispatch('classes/getClasses');
-        this.$emit('async', false);
+        if(!this.loadedFullData){
+          this.asyncProcess(true);
+
+          await this.$store.dispatch('parents/getParents');
+          await this.$store.dispatch('classes/getClasses');
+
+          this.loadedFullData = true;
+
+          this.asyncProcess(false);
+        }
+      },
+
+      fillNames(){
+        this.student.user.name = this.parents.find(v => v.id_field === this.student.user.id_field).name;
+        this.student.class_field.name = this.classes.find(v => v.id_field === this.student.class_field.id_field).name;
       }
     },
     components: {

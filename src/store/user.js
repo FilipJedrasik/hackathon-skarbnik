@@ -7,7 +7,8 @@ export default {
   namespaced: true,
 
   state: {
-    user: {}
+    user: {},
+    myClass: null // Name of my class if I am a supervisor
   },
 
   getters: {
@@ -23,6 +24,9 @@ export default {
     changedPasswordAndEmail(state, email){
       state.user.changed_password = 1;
       state.user.email = email;
+    },
+    setMyClass(state, name){
+      state.myClass = name;
     }
   },
 
@@ -89,15 +93,25 @@ export default {
       }
     },
 
-    changePassword: async ({commit}, data) => {
+    // changePassword: async ({commit}, data) => {
+    //   try{
+    //     if(process.env.VUE_APP_NOAPI !== 'true'){
+    //       await Vue.axios.post('users/password', data);
+    //     }
+    //     commit('changedPasswordAndEmail', data.email);
+    //   } catch(e){
+    //     console.log(e)
+    //     throw 'Nie udało się zmienić hasła!';
+    //   }
+    // },
+
+    // SUPERVISOR ONLY
+    getMyClass: async({commit, state}) => {
       try{
-        if(process.env.VUE_APP_NOAPI !== 'true'){
-          await Vue.axios.post('users/password', data);
-        }
-        commit('changedPasswordAndEmail', data.email);
+        let {data} = await Vue.axios.get(`class/?user=${state.user.id}`);
+        commit('setMyClass', data[0]);
       } catch(e){
         console.log(e)
-        throw 'Nie udało się zmienić hasła!';
       }
     }
   }

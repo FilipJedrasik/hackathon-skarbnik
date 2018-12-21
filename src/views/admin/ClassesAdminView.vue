@@ -61,6 +61,7 @@
                                             hide-details
                                             prepend-icon="school"
                                             single-line
+                                            :rules="pickedUserObjRule"
                                     ></v-select>
                                 </v-flex>
 
@@ -70,7 +71,7 @@
                                 <v-btn
                                         color="primary"
                                         @click.native="editedIndex === -1 ? add() : edit()"
-                                        :disabled="!valid || JSON.stringify(theClass) === JSON.stringify(beforeEdit)"
+                                        :disabled="processing || !valid || JSON.stringify(theClass) === JSON.stringify(beforeEdit)"
                                 >{{submitTitle}}</v-btn>
                             </div>
                         </v-card-text>
@@ -130,37 +131,41 @@
 <script>
   import UtilModal from '@/components/UtilModal';
 
+  const aClass = { // Currently adding/editing Class
+    name: '',
+    user:{
+      name: '',
+      id_field: null
+    }
+  };
+
   export default {
-    data: () => ({
-      loading: false, // Is data being fetched from the server now?
-      dialog: false, // Adding/editing Modal stance
-      valid: false, // is Adding/editing form valid?
+    data() {
+      return {
+        loading: false, // Is data being fetched from the server now?
+        dialog: false, // Adding/editing Modal stance
+        valid: false, // is Adding/editing form valid?
 
-      beforeEdit: {}, // Editing class start stance
+        beforeEdit: {}, // Editing class start stance
 
-      response:{ // UI Util response obj
-        type: 'error',
-        modal: false,
-        content: null,
-        ok: null,
-        cancel: null
-      },
+        response:{ // UI Util response obj
+          type: 'error',
+          modal: false,
+          content: null,
+          ok: null,
+          cancel: null
+        },
 
-      theClass: { // Currently adding/editing Class
-        name: '',
-        user:{
-          name: '',
-          id_field: null
-        }
-      },
+        theClass: JSON.parse(JSON.stringify(aClass)), // Currently adding/editing Class
 
-      deletingClass: { // Class to delete
-        theClass: {}, // Class Object
-        index: null // ID in $store.classes Array
-      },
+        deletingClass: { // Class to delete
+          theClass: {}, // Class Object
+          index: null // ID in $store.classes Array
+        },
 
-      editedIndex: -1 // Currently edited Index in $store.classes Array
-    }),
+        editedIndex: -1 // Currently edited Index in $store.classes Array
+      };
+    },
 
     computed: {
       formTitle () {
@@ -201,28 +206,22 @@
       async add(){
         if(this.$refs.classform.validate()){
           try{
-            this.$emit('async', true);
+            this.asyncProcess(true);
 
             this.theClass.user.name = this.freeTeachers.find(v => v.id_field === this.theClass.user.id_field).name;
 
             await this.$store.dispatch('classes/addClass', this.theClass);
 
             this.dialog = false;
-            this.theClass = {
-              name: '',
-              user: {
-                name: '',
-                id_field: null
-              }
-            };
+            this.theClass = JSON.parse(JSON.stringify(aClass));
 
-            this.$emit('async', false);
+            this.asyncProcess(false);
 
             this.response.content = 'Udało się dodać nową klasę';
             this.response.type = 'success';
             this.response.modal = true;
           } catch(e){
-            this.$emit('async', false);
+            this.asyncProcess(false);
             this.response.content = e;
             this.response.type = 'error';
             this.response.modal = true;
@@ -234,29 +233,23 @@
       async edit(){
         if(this.$refs.classform.validate()) {
           try {
-            this.$emit('async', true);
+            this.asyncProcess(true);
 
             this.theClass.user.name = this.freeTeachers.find(v => v.id_field === this.theClass.user.id_field).name;
             await this.$store.dispatch('classes/updateClass', this.theClass);
 
             this.dialog = false;
 
-            this.theClass = Object.assign({}, {
-              name: '',
-              user: {
-                name: '',
-                id_field: null
-              }
-            });
+            this.theClass = JSON.parse(JSON.stringify(aClass));
 
-            this.$emit('async', false);
+            this.asyncProcess(false);
 
             this.response.content = 'Udało się zaaktualizować klasę';
             this.response.type = 'success';
             this.response.modal = true;
           }
           catch (e) {
-            this.$emit('async', false);
+            this.asyncProcess(false);
             this.response.content = e;
             this.response.type = 'error';
             this.response.modal = true;
@@ -268,13 +261,13 @@
       // Preparing essential variables
       async editItem (theClass) {
         this.editedIndex = this.classes.findIndex(v => v.id_field === theClass.id_field);
-        this.beforeEdit = Object.assign({}, theClass);
-        this.theClass = Object.assign({}, theClass);
+        this.beforeEdit = JSON.parse(JSON.stringify(theClass));
+        this.theClass = JSON.parse(JSON.stringify(theClass));
 
         if(!this.$store.getters['classes/loadedFreeTeachers']){
-          this.$emit('async', true);
+          this.asyncProcess(true);
           await this.$store.dispatch('classes/getFreeTeachers');
-          this.$emit('async', false);
+          this.asyncProcess(false);
         }
 
         this.dialog = true;
@@ -297,7 +290,7 @@
       // Deleting existing class
       async asDeleteClass(){
         try{
-          this.$emit('async', true);
+          this.asyncProcess(true);
           await this.$store.dispatch('classes/deleteClass', {
             id: this.deletingClass.theClass.id_field,
             teacher: this.deletingClass.theClass.user
@@ -310,10 +303,10 @@
             index: null
           };
 
-          this.$emit('async', false);
+          this.asyncProcess(false);
 
         } catch(e){
-          this.$emit('async', false);
+          this.asyncProcess(false);
           this.response.content = e;
           this.response.type = 'error';
           this.response.modal = true;

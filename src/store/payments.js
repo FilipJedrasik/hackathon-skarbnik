@@ -29,8 +29,6 @@ export default {
   actions: {
     getPayments: async ({commit}) => {
       try{
-        //let {data} = await Vue.axios.get('class/?user=' + store.getters['user/getUser'].id);
-        //console.log(data);
         let {data} = await Vue.axios.get('payment/');
 
         commit('setPayments', data);

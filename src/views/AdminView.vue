@@ -13,7 +13,7 @@
                 <v-list class="pa-0">
                     <v-list-tile avatar>
                         <v-list-tile-avatar>
-                            <v-icon class="drawer-header-icon"dark>account_circle</v-icon>
+                            <v-icon class="drawer-header-icon" dark>account_circle</v-icon>
                         </v-list-tile-avatar>
 
                         <v-list-tile-content>
@@ -102,9 +102,6 @@
       fullPath(){
         return this.$route.path;
       }
-    },
-    props: {
-      source: String
     }
   }
 </script>
