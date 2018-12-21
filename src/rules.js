@@ -56,7 +56,7 @@ export default {
   passwordRules: [
     v => !!v || 'Hasło jest wymagane',
     v => (v && v.length >= 8) || 'Hasło musi mieć conajmniej 8 znaków',
-    v => /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#\$%\^&\*])(?=.{8,})/.test(v) || 'Hasło musi być silniejsze!'
+    v => /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&*])(?=.{8,})/.test(v) || 'Hasło musi być silniejsze!'
   ],
   emailRules: [
     v => !!v || 'E-mail jest wymagany',
