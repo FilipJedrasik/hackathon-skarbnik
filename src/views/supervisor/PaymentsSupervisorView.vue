@@ -2,6 +2,8 @@
     <div style="width:100%">
         <div v-if="processing"></div>
         <template v-else-if="this.$store.state.user.myClass">
+
+            <!--ADD/EDIT PAYMENT MODAL -->
             <v-btn
                     @click.native="dialog = true"
                     color="secondary">Dodaj zbiórkę</v-btn>
@@ -11,9 +13,14 @@
                     <v-card-title>
                         <span class="headline">Dodawanie zbiórki</span>
                     </v-card-title>
-                    <PaymentForm/>
+                    <PaymentForm
+                        :paymentObject="pd"
+                        @submit="editingIndex === -1 ? add : edit"
+                    />
                 </v-card>
             </v-dialog>
+
+
             <v-tabs
                     centered
                     color="black"
@@ -42,6 +49,11 @@
                     <ActivePaymentsDatatable/>
                 </v-tab-item>
 
+                <v-tab-item value="tab-2">
+                    <FuturePaymentsDatatable
+                        @edit="editRequest"/>
+                </v-tab-item>
+
             </v-tabs>
         </template>
         <v-card v-else>
@@ -52,29 +64,29 @@
 
 <script>
     import ActivePaymentsDatatable from '@/components/ActivePaymentsDatatable';
+    import FuturePaymentsDatatable from '@/components/FuturePaymentsDatatable';
     import PaymentForm from '@/components/PaymentForm';
+
+    const basic = {
+      target: '',
+      amount: null,
+      desc: '',
+      date_start: null,
+      date_end: null
+    };
 
   export default {
     data:() => ({
       dialog: false,
       valid: false,
-      pd:{
-        target: '',
-        amount: null,
-        desc: '',
-        date_start: null,
-        date_end: null
-      },
+      pd: Object.assign({}, basic),
+      editingIndex: -1,
       menu: false,
       menu2: false
     }),
-    // computed:{
-    //   payments(){
-    //     return this.$store.getters['payments/getPayments'];
-    //   }
-    // },
     components:{
       ActivePaymentsDatatable,
+      FuturePaymentsDatatable,
       PaymentForm
     },
     methods:{
@@ -93,15 +105,14 @@
         await this.$store.dispatch('payments/addPayment', sObj);
         this.asyncProcess(false);
 
-        this.pd = {
-          target: '',
-              amount: null,
-              desc: '',
-              date_start: null,
-              date_end: null
-        };
+        this.pd = Object.assign({}, basic);
 
         this.dialog = false;
+      },
+
+      editRequest(item){
+        this.pd = Object.assign({}, item);
+        this.dialog = true;
       }
     },
 

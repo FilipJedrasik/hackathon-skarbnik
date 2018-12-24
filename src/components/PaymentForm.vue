@@ -102,6 +102,28 @@
 
   export default {
     name: 'payment-form',
+    props: {
+      paymentObject: {
+        type: Object,
+        validator(value){
+          const keys = Object.keys(value);
+
+          const needed = ['target',
+           'amount',
+           'desc',
+           'date_start',
+           'date_end'];
+
+          for(let need of needed){
+            if(!keys.includes(need)){
+              return false;
+            }
+          }
+
+          return true;
+        }
+      }
+    },
     data(){
       return {
         payment: Object.assign({}, basic),
@@ -132,6 +154,15 @@
       myClass(){
         return this.$store.state['user/myClass'];
       }
+    },
+    mounted(){
+      this.payment.dates = [
+        this.paymentObject.date_start,
+        this.paymentObject.date_end
+      ];
+      this.payment.target = this.paymentObject.target;
+      this.payment.amount = this.paymentObject.amount;
+      this.payment.desc = this.paymentObject.desc;
     },
     methods: {
       /*
@@ -185,9 +216,6 @@ Model
           }
         }
       }
-    },
-    async created(){
-
     }
   };
 </script>
