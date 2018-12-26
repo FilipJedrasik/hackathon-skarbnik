@@ -20,7 +20,7 @@
                         </v-icon>
                         <v-icon
                                 color="red"
-                                @click="deleteItem(props.item)"
+                                @click="deleteItem(props.item.id_field, props.item.name)"
                         >
                             delete
                         </v-icon>
@@ -68,8 +68,12 @@
           amount: item.amount,
           desc: item.description,
           date_start: item.start_date,
-          date_end: item.end_date
+          date_end: item.end_date,
+          editingIndex: item.id_field
         });
+      },
+      deleteItem(id, name){
+        this.$emit('delete', {id, name});
       }
     }
   };

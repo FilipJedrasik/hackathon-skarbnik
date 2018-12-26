@@ -16,14 +16,14 @@ export default {
     v => v && /\d[A-Z]+\d$/.test(v) || "Błędna nazwa klasy"
   ],
   targetRules:[
-    v => v && v.length >= 8 || "Za krótka nazwa celu zbiórki"
+    v => v && v.length >= 5 || "Za krótka nazwa celu zbiórki"
   ],
   targetDescRules:[
-    v => v && v.length >= 50 || "Za krótki opis zbiórki"
+    v => v && v.length >= 15 || "Za krótki opis zbiórki"
   ],
   amountRules:[
     v => !!v || 'To pole jest wymagane',
-    v => /^(\d*[.]\d{1,2}|\d*)$/.test(v) || 'Błędna forma kwoty'
+    v => /^(\d*[.]\d{2}|\d*)$/.test(v) || 'Błędna forma kwoty'
   ],
   datesRules:[
     v => !!v || 'To pole jest wymagane',

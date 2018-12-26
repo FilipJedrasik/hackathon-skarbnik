@@ -1,11 +1,23 @@
 <template>
     <div style="width:100%">
+        <!-- ASYNC OPERATION MODAL -->
+        <util-modal
+                :type="response.type"
+                :content="response.content !== null ? response.content : undefined"
+                :header="response.header !== null ? response.header : undefined"
+                :ok="response.ok !== null ? response.ok : undefined"
+                :cancel="response.cancel !== null ? response.cancel : undefined"
+                @ok="deletePayment"
+                @cancel="response.modal = false"
+                :okDisabled="processing2"
+                v-model="response.modal"></util-modal>
+
         <div v-if="processing"></div>
         <template v-else-if="this.$store.state.user.myClass">
 
             <!--ADD/EDIT PAYMENT MODAL -->
             <v-btn
-                    @click.native="dialog = true"
+                    @click.native="resetPaymentObj"
                     color="secondary">Dodaj zbiórkę</v-btn>
             <v-dialog v-model="dialog" max-width="600px">
 
@@ -15,7 +27,8 @@
                     </v-card-title>
                     <PaymentForm
                         :paymentObject="pd"
-                        @submit="editingIndex === -1 ? add : edit"
+                        @cancel="dialog = false"
+                        @async="$emit('async', $event)"
                     />
                 </v-card>
             </v-dialog>
@@ -51,7 +64,8 @@
 
                 <v-tab-item value="tab-2">
                     <FuturePaymentsDatatable
-                        @edit="editRequest"/>
+                        @edit="editRequest"
+                        @delete="deleteRequest"/>
                 </v-tab-item>
 
             </v-tabs>
@@ -66,6 +80,7 @@
     import ActivePaymentsDatatable from '@/components/ActivePaymentsDatatable';
     import FuturePaymentsDatatable from '@/components/FuturePaymentsDatatable';
     import PaymentForm from '@/components/PaymentForm';
+    import UtilModal from '@/components/UtilModal';
 
     const basic = {
       target: '',
@@ -78,41 +93,67 @@
   export default {
     data:() => ({
       dialog: false,
+      deleteDialog: false,
       valid: false,
       pd: Object.assign({}, basic),
       editingIndex: -1,
       menu: false,
-      menu2: false
+      menu2: false,
+      response:{ // UI Util response obj
+        type: 'error',
+        modal: false,
+        content: null,
+        ok: null,
+        cancel: null
+      },
+      toDelete: {
+        id: null,
+        name: null
+      },
+      processing2: false
     }),
     components:{
       ActivePaymentsDatatable,
       FuturePaymentsDatatable,
-      PaymentForm
+      PaymentForm,
+      UtilModal
     },
     methods:{
-      async add(){
-        const sObj = {
-            class_field: 1,
-            start_date: this.pd.date_start,
-            end_date: this.pd.date_end,
-          amount: this.pd.amount,
-          name: this.pd.target,
-          description: this.pd.desc,
-          creation_date: '2018-09-19T10:12:20Z'
-        };
-
-        this.asyncProcess(true);
-        await this.$store.dispatch('payments/addPayment', sObj);
-        this.asyncProcess(false);
-
-        this.pd = Object.assign({}, basic);
-
-        this.dialog = false;
-      },
 
       editRequest(item){
-        this.pd = Object.assign({}, item);
+       // this.pd = Object.assign({}, item);
+        this.$set(this, 'pd', item);
         this.dialog = true;
+      },
+
+      resetPaymentObj(){
+        this.$set(this, 'pd', basic);
+        this.dialog = true;
+      },
+
+      deleteRequest({id, name}){
+        this.response.content = `Czy na pewno chcesz usunąć zbiórkę, której celem jest ${name}?`;
+        this.response.ok = 'Usuń';
+        this.response.cancel = 'Anuluj';
+
+        this.toDelete.id = id;
+        this.toDelete.name = name;
+
+        this.response.modal = true;
+      },
+
+      async deletePayment(){
+        this.$emit('async', true)
+        this.processing2 = true;
+        await this.$store.dispatch('payments/deletePayment', this.toDelete.id);
+        this.$emit('async', false)
+        this.processing2 = false;
+        this.response.modal = false;
+
+        this.toDelete = {
+          id: null,
+          name: null
+        }
       }
     },
 

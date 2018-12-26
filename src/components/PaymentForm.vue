@@ -78,12 +78,12 @@
             </v-container>
 
             <div style="text-align:right;">
-                <v-btn color="secondary" @click="dialog = false">Anuluj</v-btn>
+                <v-btn color="secondary" @click="$emit('cancel')">Anuluj</v-btn>
                 <v-btn
                         color="primary"
-                        @click.native="add"
-                        :disabled="!valid"
-                >Dodaj</v-btn>
+                        @click.native="editingIndex !== -1 ? edit() : add()"
+                        :disabled="!buttonEnabled"
+                >{{editingIndex !== -1 ? 'Zapisz' : 'Dodaj'}}</v-btn>
             </div>
         </v-card-text>
     </v-form>
@@ -97,7 +97,7 @@
       desc: null,
       amount: null,
       dates: [],
-      theClass: 8
+      theClass: null
     };
 
   export default {
@@ -127,6 +127,7 @@
     data(){
       return {
         payment: Object.assign({}, basic),
+        paymentBeforeEdit: null,
         valid: false,
         menu: null,
         menu2: null,
@@ -137,7 +138,8 @@
           content: null,
           ok: null,
           cancel: null
-        }
+        },
+        editingIndex: -1
       };
     },
     components:{
@@ -148,23 +150,46 @@
         if(n.length > 2){
           this.payment.dates = o;
         }
+      },
+      paymentObject(n){
+        this.updatePaymentModel(n);
       }
     },
     computed:{
       myClass(){
-        return this.$store.state['user/myClass'];
+        return this.$store.state.user.myClass;
+      },
+      buttonEnabled(){
+        if(this.editingIndex === -1){
+          return this.valid && !this.processing;
+        } else {
+          return JSON.stringify(this.payment) !== JSON.stringify(this.paymentBeforeEdit) && this.valid && !this.processing;
+        }
       }
     },
     mounted(){
-      this.payment.dates = [
-        this.paymentObject.date_start,
-        this.paymentObject.date_end
-      ];
-      this.payment.target = this.paymentObject.target;
-      this.payment.amount = this.paymentObject.amount;
-      this.payment.desc = this.paymentObject.desc;
+      this.updatePaymentModel(this.paymentObject);
     },
     methods: {
+      updatePaymentModel(n){
+        this.payment.target = n.target;
+        this.payment.amount = n.amount;
+        this.payment.desc = n.desc;
+        if('editingIndex' in n){
+          this.editingIndex = n.editingIndex;
+          this.payment.dates = [
+            n.date_start,
+            n.date_end
+          ];
+
+          this.paymentBeforeEdit = Object.assign({}, this.payment);
+
+        } else {
+          this.payment.dates = [];
+          this.editingIndex = -1;
+          this.$refs.payment.resetValidation();
+        }
+      },
       /*
       *
 Example Value
@@ -187,7 +212,7 @@ Model
             const earlierDateIndex = new Date(this.payment.dates[0]) > new Date(this.payment.dates[1]) ? 0 : 1;
             const d = this.payment;
 
-            this.$store.dispatch('payments/addPayment', {
+            await this.$store.dispatch('payments/addPayment', {
               class_field: this.myClass.id_field, // have 2put here something!
               start_date: d.dates[earlierDateIndex],
               end_date: d.dates[earlierDateIndex == 1 ? 0 : 1],
@@ -196,7 +221,7 @@ Model
               description: d.desc
             });
 
-            this.dialog = false;
+            this.$emit('cancel');
 
             this.payment = Object.assign({}, basic);
 
@@ -209,6 +234,46 @@ Model
           } catch(e) {
             this.asyncProcess(false);
             //console.log(e)
+            this.response.content = e;
+            this.response.type = 'error';
+            this.response.modal = true;
+
+          }
+        }
+      },
+
+      async edit(){
+        if(this.$refs.payment.validate() && this.editingIndex !== -1){
+          try {
+
+            this.asyncProcess(true);
+
+            const earlierDateIndex = new Date(this.payment.dates[0]) > new Date(this.payment.dates[1]) ? 0 : 1;
+            const d = this.payment;
+
+            await this.$store.dispatch('payments/updatePayment', {
+              class_field: this.myClass.id_field, // have 2put here something!
+              start_date: d.dates[earlierDateIndex],
+              end_date: d.dates[earlierDateIndex == 1 ? 0 : 1],
+              amount: d.amount,
+              name: d.target,
+              description: d.desc,
+              id: this.editingIndex
+            });
+
+            this.$emit('cancel');
+
+            this.payment = Object.assign({}, basic);
+
+            this.asyncProcess(false);
+
+            this.response.content = 'Udało się zaktualizować zbiórkę';
+            this.response.type = 'success';
+            this.response.modal = true;
+
+          } catch(e) {
+            this.asyncProcess(false);
+            console.log(e)
             this.response.content = e;
             this.response.type = 'error';
             this.response.modal = true;

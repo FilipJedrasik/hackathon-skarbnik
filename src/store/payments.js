@@ -14,11 +14,11 @@ export default {
     setPayments(state, payload){
       state.payments = payload;
     },
-    updatePayments(state, payload){
-      state.payments[payload.id] = payload.payments;
+    updatePayment(state, payload){
+      Vue.set(state.payments, state.payments.findIndex(v => v.id_field == payload.id), payload);
     },
-    deletePayments(state, payload){
-      state.payments.split(payload, 1);
+    deletePayment(state, id){
+      state.payments.splice(state.payments.findIndex(v => v.id_field == id), 1);
     },
     addPayments(state, payload){
       state.payments.push(payload);
@@ -37,21 +37,24 @@ export default {
     },
     updatePayment: async ({commit}, payment) => {
       try{
-        await Vue.axios.put(
-            process.env.VUE_APP_ROUTES_UPDATE_PAYMENT + payment.id,
+        await Vue.axios.patch(
+            `payment/${payment.id}/`,
             payment
         );
-        commit('updatePayment', payment);
+        commit('updatePayment', {
+            ...payment,
+            id_field: payment.id
+        });
       } catch(e){
         console.log('Payment', e);
       }
     },
-    deletePayment: async ({commit}, payment) => {
+    deletePayment: async ({commit}, payment_id) => {
       try{
-        await Vue.axios.put(
-            process.env.VUE_APP_ROUTES_DELETE_PAYMENT + payment
+        await Vue.axios.delete(
+            `payment/${payment_id}/`
         );
-        commit('deletePayment', payment);
+        commit('deletePayment', payment_id);
       } catch(e){
         console.log('Payment', e);
       }
