@@ -1,0 +1,1 @@
+export const daysBetween = (firstDate, secondDate) => Math.abs(Math.round((new Date(secondDate) - new Date(firstDate)) / (1000*60*60*24)));

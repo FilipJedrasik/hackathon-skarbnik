@@ -68,9 +68,14 @@
                                 :rules="datesRules"
                                 readonly
                         ></v-combobox>
-                        <v-date-picker v-model="payment.dates" multiple no-title scrollable>
+                        <v-date-picker
+                                v-model="payment.dates"
+                                :allowedDates="allowedDates"
+                                multiple
+                                no-title
+                                scrollable>
                             <v-spacer></v-spacer>
-                            <v-btn flat color="primary" @click="menu = false">Cancel</v-btn>
+                            <v-btn flat color="primary" @click="menu = false">Anuluj</v-btn>
                             <v-btn flat color="primary" @click="$refs.menu.save(payment.dates)">OK</v-btn>
                         </v-date-picker>
                     </v-menu>
@@ -189,6 +194,9 @@
           this.editingIndex = -1;
           this.$refs.payment.resetValidation();
         }
+      },
+      allowedDates(val){
+        return new Date(val) >= new Date();
       },
       /*
       *

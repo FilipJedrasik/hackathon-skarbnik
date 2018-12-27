@@ -19,12 +19,12 @@ describe('Rules test', () => {
   })
 
   it('classnameRules - fail for too short', () => {
-    const exec = typeof Rules.classnameRules[0]('4a') === 'string';
+    const exec = typeof Rules.classnameRules[1]('4a') === 'string';
     expect(exec).toBe(true);
   })
 
   it('classnameRules - fail for bad syntax', () => {
-    const exec = typeof Rules.classnameRules[1]('a1') === 'string';
+    const exec = typeof Rules.classnameRules[2]('a1') === 'string';
     expect(exec).toBe(true);
   })
 

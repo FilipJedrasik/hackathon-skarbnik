@@ -45,6 +45,18 @@ $colorSecondary: #5CC5EA;
   font-size: 3.5em !important;
 }
 
+.flex-center{
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.full-width{
+  width:100%;
+  text-align:center;
+}
+
 .stepper-wrapper{
   display:flex;
   flex-wrap: wrap;

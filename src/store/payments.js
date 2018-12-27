@@ -61,11 +61,11 @@ export default {
     },
     addPayment: async ({commit}, payment) => {
       try{
-        await Vue.axios.post(
+        let {data} = await Vue.axios.post(
             'payment/',
             payment
         );
-        commit('addPayments', payment);
+        commit('addPayments', data);
       } catch(e){
         console.log('Payment', e);
       }

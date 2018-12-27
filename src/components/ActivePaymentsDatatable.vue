@@ -24,6 +24,7 @@
                             <v-flex xs12 sm6>
                                 <PaymentDetailsList
                                         :title="props.item.name"
+                                        :subtitle="props.item.description"
                                         @changeFilter="filter = $event"
                                         :filteredItems="filteredItems"/>
                             </v-flex>
@@ -105,13 +106,13 @@
       filteredItems(){
         switch(this.filter){
           case 0:
-            return this.items.sort(alphabeticSort);
+            return this.items.slice().sort(alphabeticSort);
           case 1:
-            return this.items.filter((el, index) => {
+            return this.items.filter(el => {
               return el.payed === true;
             }).sort(alphabeticSort);
           default:
-            return this.items.filter((el, index) => {
+            return this.items.filter(el => {
               return el.payed === false;
             }).sort(alphabeticSort);
         }

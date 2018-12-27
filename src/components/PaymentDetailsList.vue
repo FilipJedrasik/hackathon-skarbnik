@@ -17,10 +17,12 @@
                             avatar
                             @click="item.details_modal = true"
                     >
-                        <PaymentDetailModal
+                        <PaymentDetailsModal
                                 :title="title"
+                                :subtitle="subtitle"
                                 @toggle="item.details_modal = $event"
-                                :dialog="item.details_modal"/>
+                                :dialog="item.details_modal"
+                                :name="item.title"/>
 
                         <v-list-tile-avatar>
                             <v-icon
@@ -41,7 +43,7 @@
 
 <script>
   import OneOfThreeControl from '@/components/OneOfThreeControl'
-  import PaymentDetailModal from '@/components/PaymentDetailModal'
+  import PaymentDetailsModal from '@/components/PaymentDetailsModal'
 
   export default {
     name: 'payments-details-list',
@@ -63,6 +65,10 @@
       title: {
         type: String,
         required: true
+      },
+      subtitle: {
+        type: String,
+        required: true
       }
     },
     data: () => ({
@@ -75,7 +81,7 @@
     },
     components:{
       OneOfThreeControl,
-      PaymentDetailModal
+      PaymentDetailsModal
     }
   };
 </script>
