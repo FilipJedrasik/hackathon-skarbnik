@@ -6,7 +6,7 @@
         <OneOfThreeControl v-model="filter"/>
         <div class="payers-list">
             <template v-for="(item, index) in filteredItems">
-                <transition-group name="t-fade-2">
+                <transition-group name="t-fade-2" :key="index+1000">
                     <v-divider
                             :inset="item.inset"
                             :key="index"
