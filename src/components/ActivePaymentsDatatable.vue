@@ -11,8 +11,8 @@
                     <td>{{ props.item.amount }}zł</td>
                     <td class="text-xs-right">
                         <CashBar
-                                :current="props.item.amount/3"
-                                :target="+props.item.amount"
+                                :current="props.item.amount_paided"
+                                :target="+props.item.amount * $store.getters['supervisor/getStudentsAmount']"
                         />
                     </td>
                 </tr>

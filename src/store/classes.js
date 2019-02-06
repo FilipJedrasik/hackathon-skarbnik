@@ -28,7 +28,6 @@ export default {
       Vue.set(state.classes[pos], 'user', payload.user)
     },
     deleteClasses(state, payload){
-      console.log(payload)
       state.classes.splice(state.classes.findIndex(v => v.id_field == payload.id), 1);
       if(state.loadedTeachers){
         state.freeTeachers.splice(0, 0, payload.teacher);

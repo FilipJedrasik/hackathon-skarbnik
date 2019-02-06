@@ -53,7 +53,7 @@
           if(index == 0)
             amounts.push(el.amount);
           else
-            amounts.push(el.amount + amounts[index-1]);
+            amounts.push(Number(el.amount + parseFloat(amounts[index-1])).toFixed(2));
         });
 
         return amounts.reverse();

@@ -24,11 +24,11 @@
                                <v-card-text class="py-0">
                                    <transition name="t-fade" mode="out-in">
                                        <PaymentHistoryTimeline
-                                               :payments="payments"
+                                               :payments="sortedPayments"
                                                :target="660"
                                                v-if="!addingPayment"
                                        />
-                                       <UpdatePaymentTransfer/>
+                                       <UpdatePaymentTransfer @add="addPayment" v-else/>
                                    </transition>
                                </v-card-text>
                            </v-card>
@@ -93,7 +93,7 @@
             amount: 280
           },
           {
-            date: '23.06.2018r.',
+            date: '23.06.2015r.',
             amount: 70
           },
           {
@@ -119,11 +119,33 @@
         this.localModel = n;
       }
     },
+    computed:{
+      sortedPayments(){
+        const tmp = this.payments.slice();
+        tmp.sort((a, b) => {
+          const tmpA = a.date.substr(0, 10).split('.');
+          const dateA = `${tmpA[2]}-${tmpA[1]}-${tmpA[0]}`;
+
+          const tmpB = b.date.substr(0, 10).split('.');
+          const dateB = `${tmpB[2]}-${tmpB[1]}-${tmpB[0]}`;
+          return new Date(dateB) - new Date(dateA);
+        });
+
+        return tmp;
+      }
+    },
     components: {
       UserPaymentCard,
       CircleProgressCard,
       PaymentHistoryTimeline,
       UpdatePaymentTransfer
+    },
+    methods:{
+      addPayment(ev){
+        // MOCK
+        this.payments.push(ev);
+        this.addingPayment = false;
+      }
     }
   };
 </script>

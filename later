@@ -3,3 +3,19 @@
 Fix comments
 Sprawdzić dialogi(przyciski) po kilku operacjach/admin
 Zablokowac tworzenie zbiorki w przeszlosci
+
+
+API
+1. GET /payment
+    Dobrze by było dodać do tego ilość kasy, która została już wpłacona. Jak chcesz to moge machnac zapytanie.
+
+2. Potrzebuje pobrać listę uczniów z danej klasy i każdego z nich ile zapłacił. Nie można tu po prostu pobrać ich z payment_details,
+bo przecież nie każdy już zapłacił, więc tych co nie zapłacili będzie.
+
+3. Komplikacje sie tworzą. Przydałaby sie nowa tabela, w której są kolejne wpłaty:
+    Data wpłaty
+    Kwota
+    ID zbiórki
+    ID usera
+
+4. Będę chciał pobierać wszystkie wpłaty dla danego userId i paymentId i je wyświetlić. Tak samo chciałbym dodawać, czyli GET i POST.

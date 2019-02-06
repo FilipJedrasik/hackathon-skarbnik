@@ -160,8 +160,12 @@
     async created(){
       this.asyncProcess(true);
       this.$emit('asyncAction', true);
-      await this.$store.dispatch('payments/getPayments');
-      await this.$store.dispatch('user/getMyClass');
+      await Promise.all([
+          this.$store.dispatch('payments/getPayments'),
+          this.$store.dispatch('user/getMyClass')
+      ]);
+
+      await this.$store.dispatch('supervisor/loadStudents', this.$store.getters['user/getMyClass'].id_field);
       this.$emit('asyncAction', false);
       this.asyncProcess(false);
     },

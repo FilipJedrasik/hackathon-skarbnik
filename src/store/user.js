@@ -14,7 +14,8 @@ export default {
   getters: {
     getUser: state => state.user || {},
     getRole: state => 'role' in state.user ? state.user.role : -1,
-    changedPassword: state => 'changed_password' in state.user ? state.user.changed_password : 0
+    changedPassword: state => 'changed_password' in state.user ? state.user.changed_password : 0,
+    getMyClass: state => state.myClass
   },
 
   mutations: {
@@ -75,11 +76,11 @@ export default {
       }
     },
 
-    refresh: async ({commit}) => {
+    refresh: async () => {
       try{
         delete Vue.axios.defaults.headers.common['Authorization'];
 
-        let { data } = await Vue.axios.post('users/refresh', {
+        await Vue.axios.post('users/refresh', {
           token: localStorage.getItem(process.env.VUE_APP_STORAGE_KEY)
         });
 

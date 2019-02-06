@@ -7,6 +7,7 @@ import teachers from './store/teachers'
 import parents from './store/parents'
 import classes from './store/classes'
 import students from './store/students'
+import supervisor from './store/supervisor'
 import payments from './store/payments'
 import payment_details from './store/payment_details'
 
@@ -24,6 +25,7 @@ export default new Vuex.Store({
     payments,
     payment_details,
     students,
-    counter
+    counter,
+    supervisor
   }
 })
