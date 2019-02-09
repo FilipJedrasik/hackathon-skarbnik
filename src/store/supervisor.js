@@ -1,4 +1,5 @@
 import Vue from 'vue';
+import queryFilter from './../queryFilter.js';
 
 export default {
   namespaced: true,
@@ -17,7 +18,10 @@ export default {
   actions: {
     loadStudents: async ({commit}, classId) => {
       try {
-        let { data } = await Vue.axios.get(`student/?class_field=${classId}`);
+        const url = queryFilter({
+          class_field: classId
+        }, 'student/');
+        let { data } = await Vue.axios.get(url);
         console.log(data)
         commit('setStudents', data);
       } catch(e) {

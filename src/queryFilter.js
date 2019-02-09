@@ -65,7 +65,7 @@ class Replacer {
     const idk = this.start + '?' + joinedPairs.join('&');
     return idk;
   }
-};
+}
 
 const omitEmptyValues = obj => {
   let filtered = {};
