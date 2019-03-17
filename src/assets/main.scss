@@ -1,0 +1,135 @@
+@import './mixins.scss';
+@import './transitions.scss';
+
+$colorPrimary: #FA3CB1;
+$colorSecondary: #5CC5EA;
+
+#app.application, .application{
+  /* Permalink - use to edit and share this gradient: http://colorzilla.com/gradient-editor/#f966be+0,ebebeb+31,ebebeb+65,7fcde8+100 */
+  /* Permalink - use to edit and share this gradient: http://colorzilla.com/gradient-editor/#ebebeb+35,7fcde8+100 */
+  background: #ebebeb; /* Old browsers */
+  background: -moz-linear-gradient(-45deg, #ebebeb 35%, #7fcde8 100%); /* FF3.6-15 */
+  background: -webkit-linear-gradient(-45deg, #ebebeb 35%,#7fcde8 100%); /* Chrome10-25,Safari5.1-6 */
+  background: linear-gradient(135deg, #ebebeb 35%,#7fcde8 100%) !important; /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
+  filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#ebebeb', endColorstr='#7fcde8',GradientType=1 ); /* IE6-9 fallback on horizontal gradient */
+}
+
+.drawer-header-name{
+  font-size: 1.3em;
+  font-weight: bold;
+}
+
+.drawer-header-icon{
+  font-size: 2.4em;
+}
+
+.drawer-menu-current{
+  font-weight: bold;
+}
+
+.center-image{
+  text-align: center;
+  margin: 0;
+  padding: 0;
+}
+
+.login-logo{
+  width: 100px;
+}
+
+.sk-color{
+  color: #00538a;
+}
+
+.sk-headline{
+  font-size: 3.5em !important;
+}
+
+.flex-center{
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.full-width{
+  width:100%;
+  text-align:center;
+}
+
+.stepper-wrapper{
+  display:flex;
+  flex-wrap: wrap;
+  padding-bottom:10px;
+
+  .stepper-icon{
+    font-size:5em;
+    color: $colorPrimary;
+    margin: 0 auto;
+  }
+
+  .centered-icon{
+    width:100%;
+    text-align:center;
+  }
+
+  div>h2{
+    padding-bottom: 10px;
+  }
+
+  .centered-icon+div{
+    margin-top: 15px;
+  }
+}
+
+@include for-size(tablets){
+  .sk-headline{
+    font-size: 5em !important;
+    padding: 20px 0;
+  }
+  .login-logo{
+    width: 190px;
+  }
+
+  .stepper-wrapper{
+    flex-wrap: nowrap;
+    align-items:center;
+
+    .stepper-icon{
+      padding-right: 20px;
+    }
+
+    .centered-icon{
+      width: auto;
+      text-align:center;
+    }
+
+    .centered-icon+div{
+      margin-top: 0px;
+    }
+  }
+}
+
+@include for-size(desktop){
+  .sk-headline{
+    font-size: 6em !important;
+    padding: 30px 0;
+  }
+  .login-logo{
+    width: 170px;
+  }
+}
+
+@include for-size(large-desktop){
+  .sk-headline{
+    font-size: 7em !important;
+    padding: 30px 0;
+  }
+  .login-logo{
+    width: 220px;
+  }
+}
+
+.abc .v-image__image--cover{
+  background-size:contain !important;
+}
