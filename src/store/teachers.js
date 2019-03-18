@@ -7,26 +7,26 @@ export default {
   },
 
   getters: {
-    getTeachers: state => state.teachers
+    get: state => state.teachers
   },
 
   mutations: {
-    setTeachers(state, payload){
+    SET_TEACHERS(state, payload){
       state.teachers = payload;
     },
-    updateTeacher(state, payload){
+    UPDATE_TEACHER(state, payload){
       Vue.set(state.teachers, state.teachers.findIndex(v => v.id_field == payload.id_field), payload)
     },
-    deleteTeacher(state, teacherId){
+    DELETE_TEACHER(state, teacherId){
       state.teachers.splice(state.teachers.findIndex(v => v.id_field == teacherId), 1);
     },
-    addTeacher(state, payload){
+    ADD_TEACHER(state, payload){
       state.teachers.push(payload);
     }
   },
 
   actions: {
-    getTeachers: async ({commit}) => {
+    get: async ({commit}) => {
       try{
         let {data} = await Vue.axios.get('users/?role=1');
 
@@ -34,12 +34,12 @@ export default {
           ...v,
           password: v.password.length <= 8 ? v.password : '********'
         }));
-        commit('setTeachers', result);
+        commit('SET_TEACHERS', result);
       } catch(e){
         console.log('teach', e);
       }
     },
-    updateTeacher: async ({commit}, teacher) => {
+    update: async ({commit}, teacher) => {
         try{
           await Vue.axios.patch(
               'users/' + teacher.id + '/',
@@ -49,22 +49,22 @@ export default {
               ...teacher.teacher,
               password: '********'
           };
-          commit('updateTeacher', teacher);
+          commit('UPDATE_TEACHER', teacher);
         } catch(e){
           console.log('teach', e);
         }
     },
-    deleteTeacher: async ({commit}, teacherId) => {
+    delete: async ({commit}, teacherId) => {
       try{
         await Vue.axios.delete(
             'users/' + teacherId + '/'
         );
-        commit('deleteTeacher', teacherId);
+        commit('DELETE_TEACHER', teacherId);
       } catch(e){
         console.log('teach', e);
       }
     },
-    addTeacher: async ({commit}, teacher) => {
+    add: async ({commit}, teacher) => {
       try{
         await Vue.axios.post(
             'users/',
@@ -73,7 +73,7 @@ export default {
               role: 1
             }
         );
-        commit('addTeacher', teacher);
+        commit('ADD_TEACHER', teacher);
       } catch(e){
         console.log('teach', e);
       }

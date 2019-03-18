@@ -12,12 +12,14 @@
                     :disabled="loading"
                     :dark="!loading"
                     class="mb-2">{{$vuetify.breakpoint.xsOnly ? '+' : 'Dodaj nauczyciela'}}</v-btn>
-            <AddModal 
-              v-model="dialog"
-              :beforeEdit="beforeEdit"
-              :editing="isEditing"
-              @add="add"
-              @edit="edit"/>
+                    <template v-if="loadDialog">
+                      <AddModal 
+                        v-model="dialog"
+                        :beforeEdit="beforeEdit"
+                        :editing="isEditing"
+                        @add="add"
+                        @edit="edit"/>
+                    </template>
         </v-toolbar>
 
 
@@ -82,7 +84,9 @@
     username: ''
   };
 
-  import AddModal from '@/components/Admin/Teachers/AddModal.vue';
+  const AddModal = () => import('@/components/Admin/Teachers/AddModal.vue');
+
+  import teachersModule from '@/store/teachers';
 
   export default {
     components:{
@@ -92,7 +96,8 @@
     data: () => ({
       processing: false, // Currently doing async operation
       loading: false, // Is data being fetched from the server now?
-      dialog: false, // Adding/editing Modal stance
+      dialog: true, // Adding/editing Modal stance
+      loadDialog: false, // Async cmp
       valid: false, // is Adding/editing form valid?
 
       beforeEdit: {}, // Editing teacher start stance
@@ -102,7 +107,7 @@
 
     computed: {
       teachers(){
-        return this.$store.getters['teachers/getTeachers'];
+        return this.$store.getters['teachers/get'];
       },
 
       // Responsive headers
@@ -141,7 +146,7 @@
 
           try{
             this.asyncProcess(true);
-            await this.$store.dispatch('teachers/addTeacher', teacher);
+            await this.$store.dispatch('teachers/add', teacher);
 
             this.dialog = false;
 
@@ -171,18 +176,14 @@
           })
 
           try {
-            delete this.teacher.password;
-
             this.asyncProcess(true);
 
-            await this.$store.dispatch('teachers/updateTeacher', {
+            await this.$store.dispatch('teachers/update', {
               teacher,
               id: teacher.id_field
             });
 
             this.dialog = false;
-
-            this.teacher = Object.assign({}, basic);
 
             this.asyncProcess(false);
 
@@ -230,7 +231,7 @@
       async asDeleteTeacher(teacherId){
         try{
           this.asyncProcess(true);
-          await this.$store.dispatch('teachers/deleteTeacher', teacherId);
+          await this.$store.dispatch('teachers/delete', teacherId);
 
           this.$store.commit('utilModal/SET_VISIBLE', false)
 
@@ -245,7 +246,7 @@
               visible: true,
               ok: null,
               cancel: null
-            })
+          })
         }
       },
 
@@ -254,14 +255,22 @@
       showAddModal(){
         this.isEditing = false;
         this.beforeEdit = Object.assign({}, basic);
+        this.loadDialog = true;
         this.dialog = true;
       }
     },
 
     async created(){
+      // Vuex module
+      this.$store.registerModule('teachers', teachersModule);
+
       this.loading = true;
-      await this.$store.dispatch('teachers/getTeachers');
+      await this.$store.dispatch('teachers/get');
       this.loading = false;
+    },
+
+    beforeDestroy() {
+      this.$store.unregisterModule('teachers');
     }
   }
 </script>

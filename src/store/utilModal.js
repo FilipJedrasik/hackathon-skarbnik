@@ -27,6 +27,9 @@ export default {
 
     SET(state, stance) {
       Object.keys(stance).forEach(key => Vue.set(state, key, stance[key]) );
+      if(!state.onCancel) {
+        Vue.set(state, 'onCancel', () => Vue.set(state, 'visible', false))
+      }
     }
   }
 }

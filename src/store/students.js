@@ -17,34 +17,34 @@ export default {
   },
 
   getters: {
-    getStudents: state => state.students
+    get: state => state.students
   },
 
   mutations: {
-    setStudents(state, payload){
+    SET_STUDENTS(state, payload){
       state.students = payload;
     },
-    updateStudent(state, payload){
+    UPDATE_STUDENTS(state, payload){
       Vue.set(state.students, state.students.findIndex(v => v.id_field == payload.id), payload.student)
     },
-    deleteStudent(state, studentId){
+    DELETE_STUDENT(state, studentId){
       state.students.splice(state.students.findIndex(v => v.id_field == studentId), 1);
     },
-    addStudent(state, payload){
+    ADD_STUDENT(state, payload){
       state.students.push(payload);
     }
   },
 
   actions: {
-    getStudents: async ({commit}) => {
+    get: async ({commit}) => {
       try{
         let { data } = await Vue.axios.get('student/');
-        commit('setStudents', data);
+        commit('SET_STUDENTS', data);
       } catch(e){
         console.log('Students', e);
       }
     },
-    updateStudent: async ({commit}, student) => {
+    update: async ({commit}, student) => {
       try{
         const values = {
           name: student.student.name,
@@ -56,22 +56,22 @@ export default {
             `student/${student.id}/`,
             values
         );
-        commit('updateStudent', student);
+        commit('UPDATE_STUDENTS', student);
       } catch(e){
         console.log('Students', e);
       }
     },
-    deleteStudent: async ({commit}, student) => {
+    delete: async ({commit}, student) => {
       try{
         await Vue.axios.delete(
             `student/${student}/`
         );
-        commit('deleteStudent', student);
+        commit('DELETE_STUDENT', student);
       } catch(e){
         console.log('Students', e);
       }
     },
-    addStudent: async ({commit}, student) => {
+    add: async ({commit}, student) => {
       try{
         const values = {
           name: student.name,
@@ -82,7 +82,7 @@ export default {
             'student/',
             values
         );
-        commit('addStudent', student);
+        commit('ADD_STUDENT', student);
       } catch(e){
         console.log('Students', e);
       }

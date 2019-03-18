@@ -99,7 +99,7 @@
         },
         data(){
             return {
-                dialog: false,
+                dialog: true,
                 teacher: Object.assign({}, teacherSignature),
                 formValid: false
             }

@@ -67,12 +67,18 @@
 </template>
 
 <script>
-  import NumberTile from '@/components/NumberTile';
+  
   import Chart from 'chart.js';
   import chaPaidToTarget from '@/charts/PaidToTarget';
-  import AdminWelcomeSteps from '@/components/Admin/Welcome/Steps.vue'
-  import AdminWelcomeIntroMessage from '@/components/Admin/Welcome/ConfiguredIntroMsg.vue'
 
+  // Vuex
+  import counterModule from '@/store/counter';
+
+  const NumberTile = () => import('@/components/NumberTile');
+  const AdminWelcomeSteps = () => import('@/components/Admin/Welcome/Steps.vue');
+  const AdminWelcomeIntroMessage = () => import('@/components/Admin/Welcome/ConfiguredIntroMsg.vue');
+
+  
   export default {
     data: () => ({
       loading: true,
@@ -136,11 +142,17 @@
       AdminWelcomeIntroMessage
     },
     async created(){
+      // Lazy load Vuex
+      this.$store.registerModule('counter', counterModule);
+
       this.loading = true;
       this.asyncProcess(true);
       await this.$store.dispatch('counter/getCounters');
       this.asyncProcess(false);
       this.loading = false;
+    },
+    beforeDestroy(){
+      this.$store.unregisterModule('counter');
     },
     methods:{
       createMoneyChart(){

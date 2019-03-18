@@ -7,80 +7,20 @@
             <br>
             <v-btn
                     v-show="students.length"
-                    @click="showAddModal"
+                    @click.native="showAddModal"
                     color="primary"
                     :disabled="loading"
                     :dark="!loading"
                     class="mb-2">{{$vuetify.breakpoint.xsOnly ? '+' : 'Dodaj ucznia'}}</v-btn>
             <!--ADDING TEACHER-->
-            <v-dialog v-model="dialog" max-width="600px">
-                <v-card>
-                    <!--ADD/EDIT IN ONE MODAL-->
-                    <v-card-title>
-                        <span class="headline">{{ formTitle }}</span>
-                    </v-card-title>
-
-                    <v-form
-                            v-model="valid"
-                            lazy-validation
-                            @submit="editedIndex === -1 ? add() : edit()"
-                            ref="studentform">
-                        <v-card-text>
-                            <v-container grid-list-md>
-                                <v-flex xs12>
-                                    <v-text-field
-                                            prepend-icon="assignment_ind"
-                                            v-model="student.name"
-                                            @keyup.native.esc="dialog = false"
-                                            @keyup.native.enter="valid || JSON.stringify(student) !== JSON.stringify(beforeEdit) ? (editedIndex === -1 ? add() : edit()) : ''"
-                                            :rules="nameRules"
-                                            label="Imię i nazwisko"
-                                            required
-                                    ></v-text-field>
-                                </v-flex>
-
-                                <v-flex xs12>
-                                    <v-select
-                                            :items="parents"
-                                            v-model="student.user.id_field"
-                                            item-text="name"
-                                            item-value="id_field"
-                                            menu-props="auto"
-                                            label="Rodzic"
-                                            :rules="notEmptyRules"
-                                            prepend-icon="contacts"
-                                            single-line
-                                            required
-                                    ></v-select>
-                                </v-flex>
-
-                                <v-flex xs12>
-                                    <v-select
-                                            :items="classes"
-                                            v-model="student.class_field.id_field"
-                                            item-text="name"
-                                            item-value="id_field"
-                                            menu-props="auto"
-                                            label="Klasa"
-                                            :rules="notEmptyRules"
-                                            prepend-icon="event_note"
-                                            single-line
-                                            required
-                                    ></v-select>
-                                </v-flex>
-                            </v-container>
-                            <div style="text-align:right;">
-                                <v-btn color="secondary" @click.native="dialog = false">Anuluj</v-btn>
-                                <v-btn
-                                        color="primary"
-                                        @click.native="editedIndex === -1 ? add() : edit()"
-                                        :disabled="!valid || JSON.stringify(student) === JSON.stringify(beforeEdit)"
-                                >{{submitTitle}}</v-btn>
-                            </div>
-                        </v-card-text>
-                    </v-form>
-                </v-card>
-            </v-dialog>
+            <template v-if="loadDialog">
+                <AddModal 
+                  v-model="dialog"
+                  :beforeEdit="beforeEdit"
+                  :editing="isEditing"
+                  @add="add"
+                  @edit="edit"/>
+            </template>
         </v-toolbar>
 
 
@@ -135,74 +75,42 @@
 </template>
 
 <script>
+
   const basic = {
-    name: '',
-    class_field: {
-      id: null,
-      name: ''
-    },
-    user: {
-      id_field: null,
-      name: ''
-    }
-  };
+        name: '',
+        class_field: {
+            id: null,
+            name: ''
+        },
+        user: {
+            id_field: null,
+            name: ''
+        }
+    };
+
+  const AddModal = () => import('@/components/Admin/Students/AddModal.vue');
+
+  import studentsModule from '@/store/students'
+  import parentsModule from '@/store/parents'
+  import classesModule from '@/store/classes'
 
   export default {
+    components: {
+      AddModal
+    },
     data: () => ({
       loadedFullData: false,
       loading: false, // Is data being fetched from the server now?
-      dialog: false, // Adding/editing Modal stance
+      dialog: true, // Adding/editing Modal stance
+      loadDialog: false,
       valid: false, // is Adding/editing form valid?
 
       beforeEdit: {}, // Editing student start stance
 
-      response:{ // UI Util response obj
-        type: 'error',
-        modal: false,
-        content: null,
-        ok: null,
-        cancel: null
-      },
-
-      student: Object.assign({}, basic), // Currently adding/editing Student
-
-      deletingStudent: { // Student to delete
-        student: {}, // Student Object
-        index: null // ID in $store.teachers Array
-      },
-
-      editedIndex: -1 // Currently edited Index in $store.teachers Array
+      isEditing: false
     }),
 
     computed: {
-      formTitle () {
-        return this.editedIndex === -1 ? 'Dodawanie ucznia' : 'Edytowanie ucznia'
-      },
-      submitTitle () {
-        return this.editedIndex === -1 ? 'Dodaj' : 'Zapisz';
-      },
-      students(){
-        return this.$store.getters['students/getStudents'];
-      },
-      parents(){
-        return this.$store.getters['parents/getParents'];
-      },
-      classes(){
-        return this.$store.getters['classes/getClasses'];
-      },
-
-      // Basic login rules + unique values
-      loginUsed(){
-        return [
-          ...this.loginRules,
-          v => v != null && Array.isArray(this.students) && this.students.filter(
-              x => this.editedIndex != -1 ?
-                  (this.beforeEdit.username !== x.username && x.username == v.trim() )
-                  : x.username == v.trim()
-          ).length == 0 || 'Podany login jest już zajęty'
-        ];
-      },
-
       // Responsive headers
       headers(){
         if(this.$vuetify.breakpoint.xsOnly){
@@ -225,170 +133,187 @@
             { text: 'Akcje', value: 'name', sortable: false }
           ];
         }
+      },
+
+      students(){
+          return this.$store.getters['students/get'];
+      },
+      parents(){
+          return this.$store.getters['parents/getParents'];
+            },
+      classes(){
+          return this.$store.getters['classes/getClasses'];
       }
     },
 
     methods: {
-      // Adding new teacher
-      async add(){
-        if(this.$refs.studentform.validate()){
-
-          this.response.ok = null;
-          this.response.cancel = null;
+      // Adding new student
+      async add(student){
+          this.$store.commit('utilModal/SET', {
+            ok: null,
+            cancel: null
+          })
 
           try{
             this.asyncProcess(true);
-            this.fillNames();
 
-            this.$store.dispatch('students/addStudent', this.student);
+            student.user.name = this.parents.find(v => v.id_field === student.user.id_field).name;
+            student.class_field.name = this.classes.find(v => v.id_field === student.class_field.id_field).name;
+
+            this.$store.dispatch('students/add', student);
 
             this.dialog = false;
-            this.student = JSON.parse(JSON.stringify(basic));
 
             this.asyncProcess(false);
 
-            this.response.content = 'Udało się dodać ucznia';
-            this.response.type = 'success';
-            this.response.modal = true;
+            this.$store.commit('utilModal/SET', {
+              content: 'Udało się dodać ucznia',
+              type: 'success',
+              visible: true
+            })
           } catch(e){
             this.asyncProcess(false);
-            this.response.content = e;
-            this.response.type = 'error';
-            this.response.modal = true;
+            
+            this.$store.commit('utilModal/SET', {
+              content: e.message,
+              type: 'error',
+              visible: true
+            })
           }
-        }
       },
 
       // Editing existing teacher
-      async edit(){
-        if(this.$refs.studentform.validate()) {
-
-          this.response.ok = null;
-          this.response.cancel = null;
+      async edit(student){
+          this.$store.commit('utilModal/SET', {
+            ok: null,
+            cancel: null
+          })
 
           try {
             this.asyncProcess(true);
-            this.fillNames();
 
-            //console.log(this.student);
+            // Fuck dry
+            student.user.name = this.parents.find(v => v.id_field === student.user.id_field).name;
+            student.class_field.name = this.classes.find(v => v.id_field === student.class_field.id_field).name;
 
-            this.$store.dispatch('students/updateStudent', {
-              student: this.student,
-              id: this.student.id_field
+            this.$store.dispatch('students/update', {
+              student,
+              id: student.id_field
             });
 
             this.dialog = false;
 
-            this.student = Object.assign({}, basic);
-
             this.asyncProcess(false);
 
-            this.response.content = 'Udało się zaaktualizować studenta';
-            this.response.type = 'success';
-            this.response.modal = true;
+            this.$store.commit('utilModal/SET', {
+              content: 'Udało się zaaktualizować studenta',
+              type: 'success',
+              visible: true
+            })
           }
           catch (e) {
             this.asyncProcess(false);
-            this.response.content = e;
-            this.response.type = 'error';
-            this.response.modal = true;
+            
+            this.$store.commit('utilModal/SET', {
+              content: e.message,
+              type: 'error',
+              visible: true
+            })
           }
-        }
       },
 
       // Opening editing teacher modal
       // Preparing essential variables
       async editItem (student) {
-        this.editedIndex = this.students.findIndex(v => v.id_field === student.id_field);
+        this.isEditing = true;
         this.beforeEdit = JSON.parse(JSON.stringify(student));
-        this.student = JSON.parse(JSON.stringify(student));
+        //this.student = JSON.parse(JSON.stringify(student));
 
         await this.parentsAndTeachers();
-
         this.dialog = true;
+        this.loadDialog = true;
       },
 
       // Opening delete teacher modal
       // Preparing essential variables
       deleteItem (student) {
-        this.response.header = 'Uwaga';
-        this.response.content = `Czy na pewno chcesz usunąć konto ${student.name}?`;
-        this.response.ok = 'Tak';
-        this.response.cancel = 'Anuluj';
-        this.response.type = 'error';
-        this.response.modal = true;
-
-        this.deletingStudent.student = student;
-        this.deletingStudent.index = this.students.findIndex(v => v.id_field === student.id_field);
+        this.$store.commit('utilModal/SET', {
+          header: 'Uwaga',
+          content: `Czy na pewno chcesz usunąć konto ${student.name}?`,
+          ok: 'Tak',
+          cancel: 'Anuluj',
+          type: 'error',
+          visible: true,
+          onOk: () => this.asDeleteStudent(student.id_field)
+        })
       },
 
       // Deleting existing teacher
-      async asDeleteStudent(){
+      async asDeleteStudent(student_id){
         try{
           this.asyncProcess(true);
-          await this.$store.dispatch('students/deleteStudent', this.deletingStudent.student.id_field);
+          await this.$store.dispatch('students/delete', student_id);
 
-          this.response.modal = false;
-
-          this.deletingStudent = {
-            student: {},
-            index: null
-          };
+          this.$store.commit('utilModal/SET_VISIBLE', false)
 
           this.asyncProcess(false);
 
         } catch(e){
           this.asyncProcess(false);
-          this.response.content = e;
-          this.response.type = 'error';
-          this.response.modal = true;
-          this.response.ok = null;
-          this.response.cancel = null;
+
+          this.$store.commit('utilModal/SET', {
+              content: e.message,
+              type: 'error',
+              visible: true,
+              ok: null,
+              cancel: null
+          })
         }
       },
 
       // Clearing edit's variables
       // Opening Add Teacher Modal
       async showAddModal(){
-        this.editedIndex = -1;
-        this.student = JSON.parse(JSON.stringify(basic));
-
-        this.beforeEdit = JSON.parse(JSON.stringify(this.student));
-
-        this.$refs.studentform.resetValidation();
+        this.isEditing = false;
+        this.beforeEdit = JSON.parse(JSON.stringify(basic));
 
         await this.parentsAndTeachers();
 
         this.dialog = true;
+        this.loadDialog = true;
       },
 
       async parentsAndTeachers(){
         if(!this.loadedFullData){
           this.asyncProcess(true);
 
-          await this.$store.dispatch('parents/getParents');
-          await this.$store.dispatch('classes/getClasses');
+          await Promise.all([
+            this.$store.dispatch('parents/getParents'),
+            this.$store.dispatch('classes/getClasses')
+          ]);
 
           this.loadedFullData = true;
 
           this.asyncProcess(false);
         }
-      },
-
-      fillNames(){
-        this.student.user.name = this.parents.find(v => v.id_field === this.student.user.id_field).name;
-        this.student.class_field.name = this.classes.find(v => v.id_field === this.student.class_field.id_field).name;
       }
     },
 
     async created(){
+      // Vuex module
+      this.$store.registerModule('students', studentsModule);
+      this.$store.registerModule('parents', parentsModule);
+      this.$store.registerModule('classes', classesModule);
+
       this.loading = true;
-      await this.$store.dispatch('students/getStudents');
+      await this.$store.dispatch('students/get');
       this.loading = false;
+    },
+
+    beforeDestroy() {
+      this.$store.unregisterModule('students');
+      this.$store.unregisterModule('parents');
+      this.$store.unregisterModule('classes');
     }
   }
 </script>
-
-<style scoped>
-
-</style>
