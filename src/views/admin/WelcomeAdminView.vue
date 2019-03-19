@@ -41,7 +41,9 @@
                     :description="record.description">
 
               <router-link :to="record.target" tag="span">
-                <v-btn :dark="record.darkButton !== undefined">
+                <v-btn 
+                  :data-cy="record.name"
+                  :dark="record.darkButton !== undefined">
                   <v-icon>{{record.button}}</v-icon>
                 </v-btn>
               </router-link>
@@ -90,7 +92,8 @@
           background: 'indigo darken-1',
           description: 'Ilość nauczycieli',
           button: 'keyboard_arrow_right', // Additional computed value called counters
-          target: '/admin/teachers'
+          target: '/admin/teachers',
+          name: "teachers"
         },
         {
           icon: 'event_note',
@@ -98,21 +101,24 @@
           description: 'Ilość klas',
           button: 'keyboard_arrow_right',
           darkButton: true,
-          target: '/admin/classes'
+          target: '/admin/classes',
+          name: "classes"
         },
         {
           icon: 'contacts',
           background: 'deep-orange darken-2',
           description: 'Ilość rodziców',
           button: 'keyboard_arrow_right',
-          target: '/admin/parents'
+          target: '/admin/parents',
+          name: "parents"
         },
         {
           icon: 'face',
           background: 'green darken-3',
           description: 'Ilość uczniów',
           button: 'keyboard_arrow_right',
-          target: '/admin/students'
+          target: '/admin/students',
+          name: "students"
         }
       ]
     }),

@@ -30,6 +30,9 @@ export default {
       if(!state.onCancel) {
         Vue.set(state, 'onCancel', () => Vue.set(state, 'visible', false))
       }
+      if(!state.onOk) {
+        Vue.set(state, 'onOk', () => Vue.set(state, 'visible', false))
+      }
     }
   }
 }

@@ -1,11 +1,11 @@
-describe('Admin / Teachers Test', function() {
-    it('adds/edits/deletes new teacher', function() {
+describe('Admin / Student Test', function() {
+    it('adds/edits/deletes new student', function() {
         cy.login('admin').then(() => { 
-            cy.visit('/admin/teachers')
+            cy.visit('/admin/students')
 
-            cy.get('button[data-cy="add-teacher"]').click()
+            cy.get('button[data-cy="add-student"]').click()
 
-            cy.fixture('newTeacher').then(teacher => {
+            cy.fixture('newStudent').then(student => {
 
                 // add
                 cy.get('input[data-cy="name"]')

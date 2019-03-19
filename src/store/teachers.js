@@ -66,14 +66,16 @@ export default {
     },
     add: async ({commit}, teacher) => {
       try{
-        await Vue.axios.post(
+        let { data } = await Vue.axios.post(
             'users/',
             {
                 ...teacher,
               role: 1
             }
         );
-        commit('ADD_TEACHER', teacher);
+
+        data.password = "********";
+        commit('ADD_TEACHER', data);
       } catch(e){
         console.log('teach', e);
       }

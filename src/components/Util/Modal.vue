@@ -21,6 +21,7 @@
                                 :color="$store.state.utilModal.type === 'warning' ? 'black' : 'white'"
                                 flat
                                 @click.native="$store.state.utilModal.onCancel()"
+                                data-cy="cancel"
                         >{{$store.state.utilModal.cancel}}</v-btn>
                         <v-btn
                                 v-if="$store.state.utilModal.ok !== undefined"
@@ -28,6 +29,7 @@
                                 flat
                                 :disabled="$store.state.utilModal.okDisabled"
                                 @click.native="$store.state.utilModal.onOk()"
+                                data-cy="ok"
                         >{{$store.state.utilModal.ok}}</v-btn>
                     </div>
                 </v-alert>

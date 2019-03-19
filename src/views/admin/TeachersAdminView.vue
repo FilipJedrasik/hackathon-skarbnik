@@ -3,14 +3,24 @@
         <!--HEADER - TEACHERS-->
         <v-toolbar flat color="white">
             <v-toolbar-title>Nauczyciele</v-toolbar-title>
-            <v-spacer></v-spacer>
-            <br>
+            <v-spacer/>
+            <v-flex xs10 sm3 mr-5>
+              <v-text-field
+                v-model="search"
+                append-icon="search"
+                label="Szukaj"
+                single-line
+                hide-details
+              ></v-text-field>
+            </v-flex>
+            
             <v-btn
                     v-show="teachers.length"
                     @click.native="showAddModal"
                     color="primary"
                     :disabled="loading"
                     :dark="!loading"
+                    data-cy="add-teacher"
                     class="mb-2">{{$vuetify.breakpoint.xsOnly ? '+' : 'Dodaj nauczyciela'}}</v-btn>
                     <template v-if="loadDialog">
                       <AddModal 
@@ -29,7 +39,8 @@
                 :items="loading ? [] : teachers"
                 class="elevation-1"
                 :loading="loading"
-                item-key="name"
+                item-key="email"
+                :search="search"
         >
             <!--LOADING PROGRESS BAR-->
             <v-progress-linear v-if='loading' slot="progress" color="blue" indeterminate></v-progress-linear>
@@ -42,7 +53,7 @@
                 <template v-if="$vuetify.breakpoint.mdAndUp">
                     <td>{{ props.item.password }}</td>
                 </template>
-                <td class="justify-center layout px-0">
+                <td class="justify-center layout px-0" data-cy="crud">
                     <v-icon
                             color="blue"
                             class="mr-2"
@@ -99,6 +110,7 @@
       dialog: true, // Adding/editing Modal stance
       loadDialog: false, // Async cmp
       valid: false, // is Adding/editing form valid?
+      search: null,
 
       beforeEdit: {}, // Editing teacher start stance
 
@@ -155,6 +167,8 @@
             this.$store.commit('utilModal/SET', {
               content: 'Udało się dodać nauczyciela',
               type: 'success',
+              ok: 'Ok',
+              onOk: null,
               visible: true
             })
           } catch(e){
@@ -190,6 +204,8 @@
             this.$store.commit('utilModal/SET', {
               content: 'Udało się zaaktualizować nauczyciela',
               type: 'success',
+              ok: 'Ok',
+              onOk: null,
               visible: true
             })
           }
@@ -207,6 +223,7 @@
       // Opening editing teacher modal
       // Preparing essential variables
       editItem (teacher) {
+        this.loadDialog = true;
         this.isEditing = true;
         this.editedIndex = this.teachers.findIndex(v => v.id_field === teacher.id_field);
         this.beforeEdit = Object.assign({}, teacher);

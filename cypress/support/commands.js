@@ -23,3 +23,22 @@
 //
 // -- This is will overwrite an existing command --
 // Cypress.Commands.overwrite("visit", (originalFn, url, options) => { ... })
+Cypress.Commands.add('login', role => {
+    Cypress.log({
+        name: `'Logging as ${role}'`
+    })
+
+    cy.fixture(`accounts/${role}`).then(user => {
+        cy.request('POST', 'http://localhost:8000/api/users/login', {
+            username: user.login,
+            password: user.password
+        }).then(response => {
+            cy.setCookie('skarbnik_jwt', response.body.token)
+            cy.setCookie('skarbnik_expires', 'Tue%20Mar%2029%202019%2023:47:54%20GMT+0100%20(Central%20European%20Standard%20Time)')
+            window.localStorage.setItem('skarbnik_jwt', response.body.token)
+            window.localStorage.setItem('skarbnik_expires', 'Tue%20Mar%2029%202019%2023:47:54%20GMT+0100%20(Central%20European%20Standard%20Time)')
+        
+            cy.visit('/')
+        })
+    })
+})

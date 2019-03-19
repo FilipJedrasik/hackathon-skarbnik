@@ -22,6 +22,7 @@
                                                     @keyup.native.enter="enterConfirm"
                                                     :rules="nameRules"
                                                     label="Imię i nazwisko"
+                                                    data-cy="name"
                                                     required
                                             ></v-text-field>
                                         </v-flex>
@@ -34,6 +35,7 @@
                                                     @keyup.native.esc="dialog = false"
                                                     @keyup.native.enter="enterConfirm"
                                                     label="Adres email"
+                                                    data-cy="mail"
                                                     required
                                             ></v-text-field>
                                         </v-flex>
@@ -46,6 +48,7 @@
                                                     @keyup.native.esc="dialog = false"
                                                     @keyup.native.enter="enterConfirm"
                                                     label="Login"
+                                                    data-cy="login"
                                                     required
                                             ></v-text-field>
                                         </v-flex>
@@ -59,6 +62,7 @@
                                                     type="password"
                                                     @keyup.native.esc="dialog = false"
                                                     @keyup.native.enter="enterConfirm"
+                                                    data-cy="password"
                                                     required
                                             ></v-text-field>
                                         </v-flex>
@@ -66,6 +70,7 @@
                             <div style="text-align:right;">
                                 <v-btn color="secondary" @click.native="dialog = false">Anuluj</v-btn>
                                 <v-btn
+                                        data-cy="submit"
                                         color="primary"
                                         @click.native="!editing ? add() : edit()"
                                         :disabled="!formValid || JSON.stringify(teacher) === JSON.stringify(beforeEdit) || processing"
@@ -154,7 +159,7 @@
             },
 
             teachers(){
-                return this.$store.getters['teachers/getTeachers'];
+                return this.$store.getters['teachers/get'];
             },
         },
         methods: {
@@ -182,6 +187,12 @@
                 this.$refs.teacherform.resetValidation();
 
                 this.dialog = false;
+            }
+        },
+        mounted(){
+            if(this.editing) {
+                this.teacher = Object.assign({}, this.beforeEdit)
+                this.$refs.teacherform.resetValidation();
             }
         }
     };
