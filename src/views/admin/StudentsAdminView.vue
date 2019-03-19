@@ -3,14 +3,24 @@
         <!--HEADER - TEACHERS-->
         <v-toolbar flat color="white">
             <v-toolbar-title>Uczniowie</v-toolbar-title>
-            <v-spacer></v-spacer>
-            <br>
+            <v-spacer/>
+            <v-flex xs10 sm3 mr-5>
+              <v-text-field
+                v-model="search"
+                append-icon="search"
+                label="Szukaj"
+                single-line
+                hide-details
+              ></v-text-field>
+            </v-flex>
+            
             <v-btn
                     v-show="students.length"
                     @click.native="showAddModal"
                     color="primary"
                     :disabled="loading"
                     :dark="!loading"
+                    data-cy="add-student"
                     class="mb-2">{{$vuetify.breakpoint.xsOnly ? '+' : 'Dodaj ucznia'}}</v-btn>
             <!--ADDING TEACHER-->
             <template v-if="loadDialog">
@@ -31,6 +41,7 @@
                 class="elevation-1"
                 :loading="loading"
                 item-key="name"
+                :search="search"
         >
             <!--LOADING PROGRESS BAR-->
             <v-progress-linear v-if='loading' slot="progress" color="blue" indeterminate></v-progress-linear>
@@ -40,11 +51,11 @@
                     <td>{{ props.item.user.name }}</td>
                     <td>{{ props.item.class_field.name }}</td>
                 </template>
-                <td class="justify-center layout px-0">
+                <td class="justify-center layout px-0" data-cy="crud">
                     <v-icon
                             color="blue"
                             class="mr-2"
-                            @click="editItem(props.item, props.index)"
+                            @click="editItem(props.item)"
                     >
                         edit
                     </v-icon>
@@ -104,6 +115,7 @@
       dialog: true, // Adding/editing Modal stance
       loadDialog: false,
       valid: false, // is Adding/editing form valid?
+      search: null,
 
       beforeEdit: {}, // Editing student start stance
 
@@ -139,10 +151,10 @@
           return this.$store.getters['students/get'];
       },
       parents(){
-          return this.$store.getters['parents/getParents'];
+          return this.$store.getters['parents/get'];
             },
       classes(){
-          return this.$store.getters['classes/getClasses'];
+          return this.$store.getters['classes/get'];
       }
     },
 
@@ -160,7 +172,7 @@
             student.user.name = this.parents.find(v => v.id_field === student.user.id_field).name;
             student.class_field.name = this.classes.find(v => v.id_field === student.class_field.id_field).name;
 
-            this.$store.dispatch('students/add', student);
+            await this.$store.dispatch('students/add', student);
 
             this.dialog = false;
 
@@ -169,6 +181,8 @@
             this.$store.commit('utilModal/SET', {
               content: 'Udało się dodać ucznia',
               type: 'success',
+              ok: 'Ok',
+              onOk: null,
               visible: true
             })
           } catch(e){
@@ -196,7 +210,7 @@
             student.user.name = this.parents.find(v => v.id_field === student.user.id_field).name;
             student.class_field.name = this.classes.find(v => v.id_field === student.class_field.id_field).name;
 
-            this.$store.dispatch('students/update', {
+            await this.$store.dispatch('students/update', {
               student,
               id: student.id_field
             });
@@ -208,6 +222,8 @@
             this.$store.commit('utilModal/SET', {
               content: 'Udało się zaaktualizować studenta',
               type: 'success',
+              ok: 'Ok',
+              onOk: null,
               visible: true
             })
           }
@@ -227,7 +243,6 @@
       async editItem (student) {
         this.isEditing = true;
         this.beforeEdit = JSON.parse(JSON.stringify(student));
-        //this.student = JSON.parse(JSON.stringify(student));
 
         await this.parentsAndTeachers();
         this.dialog = true;
@@ -249,10 +264,10 @@
       },
 
       // Deleting existing teacher
-      async asDeleteStudent(student_id){
+      async asDeleteStudent(studentId){
         try{
           this.asyncProcess(true);
-          await this.$store.dispatch('students/delete', student_id);
+          await this.$store.dispatch('students/delete', studentId);
 
           this.$store.commit('utilModal/SET_VISIBLE', false)
 
@@ -288,8 +303,8 @@
           this.asyncProcess(true);
 
           await Promise.all([
-            this.$store.dispatch('parents/getParents'),
-            this.$store.dispatch('classes/getClasses')
+            this.$store.dispatch('parents/get'),
+            this.$store.dispatch('classes/get')
           ]);
 
           this.loadedFullData = true;

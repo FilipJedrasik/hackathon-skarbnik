@@ -11,37 +11,37 @@ export default {
   },
 
   mutations: {
-    setPayments(state, payload){
+    SET(state, payload){
       state.payments = payload;
     },
-    updatePayment(state, payload){
+    UPDATE(state, payload){
       Vue.set(state.payments, state.payments.findIndex(v => v.id_field == payload.id), payload);
     },
-    deletePayment(state, id){
+    DELETE(state, id){
       state.payments.splice(state.payments.findIndex(v => v.id_field == id), 1);
     },
-    addPayments(state, payload){
+    ADD(state, payload){
       state.payments.push(payload);
     }
   },
 
   actions: {
-    getPayments: async ({commit}) => {
+    get: async ({commit}) => {
       try{
         let {data} = await Vue.axios.get('payment/');
 
-        commit('setPayments', data);
+        commit('SET', data);
       } catch(e){
         console.log('Payment', e);
       }
     },
-    updatePayment: async ({commit}, payment) => {
+    update: async ({commit}, payment) => {
       try{
         await Vue.axios.patch(
             `payment/${payment.id}/`,
             payment
         );
-        commit('updatePayment', {
+        commit('UPDATE', {
             ...payment,
             id_field: payment.id
         });
@@ -49,23 +49,23 @@ export default {
         console.log('Payment', e);
       }
     },
-    deletePayment: async ({commit}, payment_id) => {
+    delete: async ({commit}, payment_id) => {
       try{
         await Vue.axios.delete(
             `payment/${payment_id}/`
         );
-        commit('deletePayment', payment_id);
+        commit('DELETE', payment_id);
       } catch(e){
         console.log('Payment', e);
       }
     },
-    addPayment: async ({commit}, payment) => {
+    add: async ({commit}, payment) => {
       try{
         let {data} = await Vue.axios.post(
             'payment/',
             payment
         );
-        commit('addPayments', data);
+        commit('ADD', data);
       } catch(e){
         console.log('Payment', e);
       }

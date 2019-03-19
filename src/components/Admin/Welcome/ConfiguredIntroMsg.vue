@@ -12,6 +12,4 @@
 </template>
 
 <script>
-  export default {
-    name: 'welcome-intro-message'
-  };
+  export default {};

@@ -7,26 +7,26 @@ export default {
   },
 
   getters: {
-    getParents: state => state.parents
+    get: state => state.parents
   },
 
   mutations: {
-    setParents(state, payload){
+    SET(state, payload){
       state.parents = payload;
     },
-    updateParents(state, payload){
+    UPDATE(state, payload){
       Vue.set(state.parents, state.parents.findIndex(v => v.id_field == payload.id_field), payload)
     },
-    deleteParents(state, parentId){
+    DELETE(state, parentId){
       state.parents.splice(state.parents.findIndex(v => v.id_field == parentId), 1);
     },
-    addParent(state, payload){
+    ADD(state, payload){
       state.parents.push(payload);
     }
   },
 
   actions: {
-    getParents: async ({commit}) => {
+    get: async ({commit}) => {
       try{
         let {data} = await Vue.axios.get('users/?role=0');
 
@@ -34,12 +34,12 @@ export default {
           ...v,
           password: v.password.length <= 8 ? v.password : '********'
         }));
-        commit('setParents', result);
+        commit('SET', result);
       } catch(e){
         console.log('parent', e);
       }
     },
-    updateParent: async ({commit}, parent) => {
+    update: async ({commit}, parent) => {
       try{
         await Vue.axios.patch(
             'users/' + parent.id + '/',
@@ -49,22 +49,22 @@ export default {
           ...parent.parent,
           password: '********'
         };
-        commit('updateParents', parent);
+        commit('UPDATE', parent);
       } catch(e){
         console.log('parent', e);
       }
     },
-    deleteParent: async ({commit}, parentId) => {
+    delete: async ({commit}, parentId) => {
       try{
         await Vue.axios.delete(
             'users/' + parentId + '/'
         );
-        commit('deleteParents', parent);
+        commit('DELETE', parent);
       } catch(e){
         console.log('parent', e);
       }
     },
-    addParent: async ({commit}, parent) => {
+    add: async ({commit}, parent) => {
       try{
         await Vue.axios.post(
             'users/',
@@ -73,7 +73,7 @@ export default {
               role: 0
             }
         );
-        commit('addParent', parent);
+        commit('ADD', parent);
       } catch(e){
         console.log('parent', e);
       }

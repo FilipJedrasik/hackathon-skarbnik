@@ -153,7 +153,7 @@
 
       this.loading = true;
       this.asyncProcess(true);
-      await this.$store.dispatch('counter/getCounters');
+      await this.$store.dispatch('counter/get');
       this.asyncProcess(false);
       this.loading = false;
     },

@@ -11,57 +11,57 @@ export default {
   },
 
   mutations: {
-    setPaymentDetails(state, payload){
+    SET(state, payload){
       state.paymentDetails = payload;
     },
-    updatePaymentDetails(state, payload){
+    UPDATE(state, payload){
       state.paymentDetails[payload.id] = payload.paymentDetails;
     },
-    deletePaymentDetails(state, payload){
+    DELETE(state, payload){
       state.paymentDetails.split(payload, 1);
     },
-    addPaymentDetails(state, payload){
+    ADD(state, payload){
       state.paymentDetails.push(payload);
     }
   },
 
   actions: {
-    getPaymentDetails: async ({commit}) => {
+    get: async ({commit}) => {
       try{
         let {data} = await Vue.axios.get(process.env.VUE_APP_ROUTES_GET_PAYMENT_DETAILS);
-        commit('setClasses', data.paymentDetails);
+        commit('SET', data.paymentDetails);
       } catch(e){
         console.log('paymentDetails', e);
       }
     },
-    updatePaymentDetails: async ({commit}, paymentDetail) => {
+    update: async ({commit}, paymentDetail) => {
       try{
         await Vue.axios.put(
             process.env.VUE_APP_ROUTES_UPDATE_PAYMENT_DETAILS + paymentDetail.id,
             paymentDetail
         );
-        commit('updatePaymentDetails', paymentDetail);
+        commit('UPDATE', paymentDetail);
       } catch(e){
         console.log('paymentDetails', e);
       }
     },
-    deleteClass: async ({commit}, paymentDetail) => {
+    delete: async ({commit}, paymentDetail) => {
       try{
         await Vue.axios.put(
             process.env.VUE_APP_ROUTES_DELETE_PAYMENT_DETAILS + paymentDetail
         );
-        commit('deletePaymentDetails', paymentDetail);
+        commit('DELETE', paymentDetail);
       } catch(e){
         console.log('paymentDetails', e);
       }
     },
-    addClass: async ({commit}, paymentDetail) => {
+    add: async ({commit}, paymentDetail) => {
       try{
         await Vue.axios.post(
             process.env.VUE_APP_ROUTES_ADD_PAYMENT_DETAILS,
             paymentDetail
         );
-        commit('addClass', paymentDetail);
+        commit('ADD', paymentDetail);
       } catch(e){
         console.log('paymentDetails', e);
       }

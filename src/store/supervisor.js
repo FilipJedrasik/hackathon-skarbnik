@@ -11,7 +11,7 @@ export default {
     getStudentsAmount: state => state.students !== null && state.students !== undefined ? state.students.length : 0
   },
   mutations: {
-    setStudents(state, payload) {
+    SET(state, payload) {
       Vue.set(state, 'students', payload);
     }
   },
@@ -23,7 +23,7 @@ export default {
         }, 'student/');
         let { data } = await Vue.axios.get(url);
         console.log(data)
-        commit('setStudents', data);
+        commit('SET', data);
       } catch(e) {
         console.log('Err supervisor/loadStudents', e);
       }

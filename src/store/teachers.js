@@ -11,16 +11,16 @@ export default {
   },
 
   mutations: {
-    SET_TEACHERS(state, payload){
+    SET(state, payload){
       state.teachers = payload;
     },
-    UPDATE_TEACHER(state, payload){
+    UPDATE(state, payload){
       Vue.set(state.teachers, state.teachers.findIndex(v => v.id_field == payload.id_field), payload)
     },
-    DELETE_TEACHER(state, teacherId){
+    DELETE(state, teacherId){
       state.teachers.splice(state.teachers.findIndex(v => v.id_field == teacherId), 1);
     },
-    ADD_TEACHER(state, payload){
+    ADD(state, payload){
       state.teachers.push(payload);
     }
   },
@@ -34,7 +34,7 @@ export default {
           ...v,
           password: v.password.length <= 8 ? v.password : '********'
         }));
-        commit('SET_TEACHERS', result);
+        commit('SET', result);
       } catch(e){
         console.log('teach', e);
       }
@@ -49,7 +49,7 @@ export default {
               ...teacher.teacher,
               password: '********'
           };
-          commit('UPDATE_TEACHER', teacher);
+          commit('UPDATE', teacher);
         } catch(e){
           console.log('teach', e);
         }
@@ -59,7 +59,7 @@ export default {
         await Vue.axios.delete(
             'users/' + teacherId + '/'
         );
-        commit('DELETE_TEACHER', teacherId);
+        commit('DELETE', teacherId);
       } catch(e){
         console.log('teach', e);
       }
@@ -75,7 +75,7 @@ export default {
         );
 
         data.password = "********";
-        commit('ADD_TEACHER', data);
+        commit('ADD', data);
       } catch(e){
         console.log('teach', e);
       }

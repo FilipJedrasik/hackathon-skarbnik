@@ -36,7 +36,7 @@ export default {
     }
   },
   actions: {
-    getCounters: async ({commit}) => {
+    get: async ({commit}) => {
       try {
         let {data} = await Vue.axios.get('counter/');
         commit('SET', data.constructor === Array ? data[0] : data);

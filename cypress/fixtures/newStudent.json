@@ -1,6 +1,11 @@
 {
     "name": "Ambrozja Ostrowski",
     "mail": "ambanostr956@gmail.com",
-    "login": "astra_ostr",
-    "password": "zaq1@WSX"
+    "parent": "Anna Krok",
+    "class": "2b",
+    "edit" : {
+        "name": "Aanon Jenek",
+        "parent": "Kacper Jaszczyk",
+        "class": "1AA3"
+    }
 }

@@ -21,16 +21,16 @@ export default {
   },
 
   mutations: {
-    SET_STUDENTS(state, payload){
+    SET(state, payload){
       state.students = payload;
     },
-    UPDATE_STUDENTS(state, payload){
+    UPDATE(state, payload){
       Vue.set(state.students, state.students.findIndex(v => v.id_field == payload.id), payload.student)
     },
-    DELETE_STUDENT(state, studentId){
+    DELETE(state, studentId){
       state.students.splice(state.students.findIndex(v => v.id_field == studentId), 1);
     },
-    ADD_STUDENT(state, payload){
+    ADD(state, payload){
       state.students.push(payload);
     }
   },
@@ -39,7 +39,7 @@ export default {
     get: async ({commit}) => {
       try{
         let { data } = await Vue.axios.get('student/');
-        commit('SET_STUDENTS', data);
+        commit('SET', data);
       } catch(e){
         console.log('Students', e);
       }
@@ -56,7 +56,7 @@ export default {
             `student/${student.id}/`,
             values
         );
-        commit('UPDATE_STUDENTS', student);
+        commit('UPDATE', student);
       } catch(e){
         console.log('Students', e);
       }
@@ -66,7 +66,7 @@ export default {
         await Vue.axios.delete(
             `student/${student}/`
         );
-        commit('DELETE_STUDENT', student);
+        commit('DELETE', student);
       } catch(e){
         console.log('Students', e);
       }
@@ -78,11 +78,15 @@ export default {
           user: student.user.id_field,
           class_field: student.class_field.id_field
         };
-        await Vue.axios.post(
+        let { data } = await Vue.axios.post(
             'student/',
             values
         );
-        commit('ADD_STUDENT', student);
+        commit('ADD', {
+          ...data,
+          class_field: student.class_field,
+          user: student.user
+        });
       } catch(e){
         console.log('Students', e);
       }

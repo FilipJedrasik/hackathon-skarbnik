@@ -9,56 +9,62 @@ describe('Admin / Student Test', function() {
 
                 // add
                 cy.get('input[data-cy="name"]')
-                .type(teacher.name)
-                .should('have.value', teacher.name)
+                .type(student.name)
+                .should('have.value', student.name)
 
-                cy.get('input[data-cy="mail"]')
-                .type(teacher.mail)
-                .should('have.value', teacher.mail)
+                cy.get('div[data-cy="parents"]')
+                .find('div.v-input__append-inner')
+                .contains('arrow_drop_down')
+                .click()
 
-                cy.get('input[data-cy="login"]')
-                .type(teacher.login)
-                .should('have.value', teacher.login)
+                cy.contains(student.parent).click()
 
-                cy.get('input[data-cy="password"]')
-                .type(teacher.password)
-                .should('have.value', teacher.password)
+                cy.get('div[data-cy="class"]')
+                .find('div.v-input__append-inner')
+                .contains('arrow_drop_down')
+                .click()
 
+                cy.contains(student.class).click()
                 cy.get('button[data-cy="submit"]').click()
-
                 cy.get('button[data-cy="ok"]').click()
+
+
                 // edit
-                cy.contains('arrow_drop_down').click()
+                cy.get('.v-datatable__actions')
+                .contains('arrow_drop_down').click()
                 cy.get('div.v-menu__content.theme--light.v-menu__content--auto.menuable__content__active > div > div > div:nth-child(4) > a > div > div')
                     .click();
                 
-                cy.contains(teacher.name).siblings('td[data-cy="crud"]')
+                cy.contains(student.name).siblings('td[data-cy="crud"]')
                 .children().contains('edit').click()
-
+               
                 cy.get('input[data-cy="name"]')
                 .clear()
-                .type(teacher.name + 'abcdefghi')
-                .should('have.value', teacher.name + 'abcdefghi')
+                .type(student.edit.name)
+                .should('have.value', student.edit.name)
 
-                cy.get('input[data-cy="mail"]')
-                .clear()
-                .type(teacher.mail.substr(3))
-                .should('have.value', teacher.mail.substr(3))
+                cy.get('div[data-cy="parents"]')
+                .find('div.v-input__append-inner')
+                .contains('arrow_drop_down')
+                .click()
 
-                cy.get('input[data-cy="login"]')
-                .clear()
-                .type(teacher.login + '123')
-                .should('have.value', teacher.login + '123')
+                cy.contains(student.edit.parent).click()
 
+                cy.get('div[data-cy="class"]')
+                .find('div.v-input__append-inner')
+                .contains('arrow_drop_down')
+                .click()
+
+                cy.contains(student.edit.class).click()
                 cy.get('button[data-cy="submit"]').click()
                 cy.get('button[data-cy="ok"]').click()
 
-                cy.contains(teacher.name + 'abcdefghi')
-                cy.contains(teacher.mail.substr(3))
-                cy.contains(teacher.login + '123')
+                cy.contains(student.edit.name)
+                cy.contains(student.edit.class)
+                cy.contains(student.edit.parent)
                 
-                // delete
-                cy.contains(teacher.name + 'abcdefghi').siblings('td[data-cy="crud"]')
+                // // delete
+                cy.contains(student.edit.name).siblings('td[data-cy="crud"]')
                 .children().contains('delete').click()
 
                 cy.get('button[data-cy="ok"]').click()

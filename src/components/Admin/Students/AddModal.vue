@@ -12,7 +12,7 @@
                             lazy-validation
                             @submit="!editing ? add() : edit()"
                             ref="studentform">
-                        <v-card-text>
+                        <v-card-text data-cy="adding-student-dialog">
                             <v-container grid-list-md>
                                 <v-flex xs12>
                                     <v-text-field
@@ -22,11 +22,12 @@
                                             @keyup.native.enter="valid || JSON.stringify(student) !== JSON.stringify(beforeEdit) ? (editedIndex === -1 ? add() : edit()) : ''"
                                             :rules="nameRules"
                                             label="Imię i nazwisko"
+                                            data-cy="name"
                                             required
                                     ></v-text-field>
                                 </v-flex>
 
-                                <v-flex xs12>
+                                <v-flex xs12 data-cy="parents">
                                     <v-select
                                             :items="parents"
                                             v-model="student.user.id_field"
@@ -41,7 +42,7 @@
                                     ></v-select>
                                 </v-flex>
 
-                                <v-flex xs12>
+                                <v-flex xs12 data-cy="class">
                                     <v-select
                                             :items="classes"
                                             v-model="student.class_field.id_field"
@@ -59,6 +60,7 @@
                             <div style="text-align:right;">
                                 <v-btn color="secondary" @click.native="dialog = false">Anuluj</v-btn>
                                 <v-btn
+                                        data-cy="submit"
                                         color="primary"
                                         @click.native="!editing ? add() : edit()"
                                         :disabled="!formValid || JSON.stringify(student) === JSON.stringify(beforeEdit) || processing"
@@ -143,10 +145,10 @@
                 return this.$store.getters['students/get'];
             },
             parents(){
-                return this.$store.getters['parents/getParents'];
+                return this.$store.getters['parents/get'];
             },
             classes(){
-                return this.$store.getters['classes/getClasses'];
+                return this.$store.getters['classes/get'];
             }
         },
         methods: {
