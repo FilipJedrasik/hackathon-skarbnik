@@ -139,7 +139,7 @@
                 return [
                 ...this.emailRules,
                 v => v != null && Array.isArray(this.parents) && this.parents.filter(
-                    x => this.editedIndex != -1 ?
+                    x => this.editing ?
                         (this.beforeEdit.email !== x.email && x.email == v.trim() )
                         : x.email == v.trim()
                 ).length == 0 || 'Podany email jest już zajęty'
@@ -151,7 +151,7 @@
                 return [
                 ...this.loginRules,
                 v => v != null && Array.isArray(this.parents) && this.parents.filter(
-                    x => this.editedIndex != -1 ?
+                    x => this.editing ?
                         (this.beforeEdit.username !== x.username && x.username == v.trim() )
                         : x.username == v.trim()
                 ).length == 0 || 'Podany login jest już zajęty'

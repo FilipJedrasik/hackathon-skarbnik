@@ -54,7 +54,7 @@
                 <template v-if="$vuetify.breakpoint.mdAndUp">
                     <td>{{ props.item.password }}</td>
                 </template>
-                <td class="justify-center layout px-0"  data-cy="crud">
+                <td class="justify-center layout px-0" data-cy="crud">
                     <v-icon
                             color="blue"
                             class="mr-2"
@@ -227,7 +227,6 @@
       editItem (parent) {
         this.loadDialog = true;
         this.isEditing = true;
-        this.editedIndex = this.parents.findIndex(v => v.id_field === parent.id_field);
         this.beforeEdit = Object.assign({}, parent);
         this.dialog = true;
       },

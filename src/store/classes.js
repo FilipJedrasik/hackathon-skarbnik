@@ -101,7 +101,10 @@ export default {
             'class/',
             payload
         );
-        commit('ADD_CLASS', data);
+        commit('ADD_CLASS', {
+          ...data,
+          user: clas.user
+        });
       } catch(e){
         console.log('clas', e);
       }

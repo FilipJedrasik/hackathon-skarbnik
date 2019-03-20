@@ -23,60 +23,14 @@
                     data-cy="add-class"
                     class="mb-2">{{$vuetify.breakpoint.xsOnly ? '+' : 'Dodaj nową klasę'}}</v-btn>
             <!--ADDING CLASS-->
-            <v-dialog v-model="dialog" max-width="600px">
-                <v-card>
-                    <!--ADD/EDIT IN ONE MODAL-->
-                    <v-card-title>
-                        <span class="headline">{{ formTitle }}</span>
-                    </v-card-title>
-
-                    <v-form
-                            v-model="valid"
-                            lazy-validation
-                            @submit="editedIndex === -1 ? add() : edit()"
-                            ref="classform">
-                        <v-card-text>
-                            <v-container grid-list-md>
-                                <v-flex xs12>
-                                    <v-text-field
-                                            prepend-icon="event_note"
-                                            v-model="theClass.name"
-                                            @keyup.native.esc="dialog = false"
-                                            @keyup.native.enter="valid || JSON.stringify(theClass) !== JSON.stringify(beforeEdit) ? (editedIndex === -1 ? add() : edit()) : ''"
-                                            :rules="classnameRulesUnique"
-                                            label="Nazwa klasy"
-                                            required
-                                    ></v-text-field>
-                                </v-flex>
-
-                                <v-flex xs12>
-                                    <v-select
-                                            :items="freeTeachers"
-                                            v-model="theClass.user.id_field"
-                                            item-text="name"
-                                            item-value="id_field"
-                                            menu-props="auto"
-                                            label="Wychowawca"
-                                            hide-details
-                                            prepend-icon="school"
-                                            single-line
-                                            :rules="pickedUserObjRule"
-                                    ></v-select>
-                                </v-flex>
-
-                            </v-container>
-                            <div style="text-align:right;">
-                                <v-btn color="secondary" @click.native="dialog = false">Anuluj</v-btn>
-                                <v-btn
-                                        color="primary"
-                                        @click.native="editedIndex === -1 ? add() : edit()"
-                                        :disabled="processing || !valid || JSON.stringify(theClass) === JSON.stringify(beforeEdit)"
-                                >{{submitTitle}}</v-btn>
-                            </div>
-                        </v-card-text>
-                    </v-form>
-                </v-card>
-            </v-dialog>
+           <template v-if="loadDialog">
+                      <AddModal 
+                        v-model="dialog"
+                        :beforeEdit="beforeEdit"
+                        :editing="isEditing"
+                        @add="add"
+                        @edit="edit"/>
+            </template>
         </v-toolbar>
 
 
@@ -87,13 +41,14 @@
                 class="elevation-1"
                 :loading="loading"
                 item-key="name"
+                :search="search"
         >
             <!--LOADING PROGRESS BAR-->
             <v-progress-linear v-if='loading' slot="progress" color="blue" indeterminate></v-progress-linear>
             <template slot="items" slot-scope="props">
                 <td>{{ props.item.name }}</td>
                 <td>{{ props.item.user.name }}</td>
-                <td class="justify-end layout px-3">
+                <td class="justify-end layout px-3" data-cy="crud">
                     <v-icon
                             color="blue"
                             class="mr-2"
@@ -136,56 +91,34 @@
     }
   };
 
+  import classesModule from '@/store/classes'
+
+  const AddModal = () => import('@/components/Admin/Classes/AddModal.vue');
+
   export default {
+    components:{
+      AddModal
+    },
+
     data() {
       return {
+        processing: false, // Currently doing async operation
         loading: false, // Is data being fetched from the server now?
-        dialog: false, // Adding/editing Modal stance
+        dialog: true, // Adding/editing Modal stance
+        loadDialog: false,
         valid: false, // is Adding/editing form valid?
-
-        beforeEdit: {}, // Editing class start stance
-
-        response:{ // UI Util response obj
-          type: 'error',
-          modal: false,
-          content: null,
-          ok: null,
-          cancel: null
-        },
-
-        theClass: JSON.parse(JSON.stringify(aClass)), // Currently adding/editing Class
-
-        deletingClass: { // Class to delete
-          theClass: {}, // Class Object
-          index: null // ID in $store.classes Array
-        },
-
-        editedIndex: -1 // Currently edited Index in $store.classes Array
+        search: null,
+        
+        beforeEdit: {}, // Editing parent start stance
+      
+        isEditing: false
       };
     },
 
     computed: {
-      formTitle () {
-        return this.editedIndex === -1 ? 'Dodawanie klasy' : 'Edytowanie klasy'
-      },
-      submitTitle () {
-        return this.editedIndex === -1 ? 'Dodaj' : 'Zapisz';
-      },
+      
       classes(){
-        return this.$store.getters['classes/getClasses'];
-      },
-      freeTeachers(){
-        return this.editedIndex === -1 ? this.$store.getters['classes/getFreeTeachers'] : [...this.$store.getters['classes/getFreeTeachers'], this.theClass.user];
-      },
-      classnameRulesUnique(){
-        return [
-            ...this.classnameRules,
-          v => v != null && Array.isArray(this.classes) && this.classes.filter(
-              x => this.editedIndex != -1 ?
-                  (this.beforeEdit.name !== x.name && x.name == v.trim() )
-                  : x.name == v.trim()
-          ).length == 0 || 'Podana klasa już istnieje'
-        ];
+        return this.$store.getters['classes/get'];
       },
 
       // Responsive headers
@@ -200,66 +133,74 @@
 
     methods: {
       // Adding new class
-      async add(){
-        if(this.$refs.classform.validate()){
+      async add(theClass){
           try{
             this.asyncProcess(true);
 
-            this.theClass.user.name = this.freeTeachers.find(v => v.id_field === this.theClass.user.id_field).name;
-
-            await this.$store.dispatch('classes/addClass', this.theClass);
+            await this.$store.dispatch('classes/add', theClass);
 
             this.dialog = false;
-            this.theClass = JSON.parse(JSON.stringify(aClass));
 
             this.asyncProcess(false);
 
-            this.response.content = 'Udało się dodać nową klasę';
-            this.response.type = 'success';
-            this.response.modal = true;
+            this.$store.commit('utilModal/SET', {
+              content: 'Udało się dodać nową klasę',
+              type: 'success',
+              ok: 'Ok',
+              onOk: null,
+              visible: true
+            })
           } catch(e){
             this.asyncProcess(false);
-            this.response.content = e;
-            this.response.type = 'error';
-            this.response.modal = true;
+            
+            this.$store.commit('utilModal/SET', {
+              content: e.message,
+              type: 'error',
+              visible: true
+            })
           }
-        }
       },
 
       // Editing existing class
-      async edit(){
-        if(this.$refs.classform.validate()) {
+      async edit(theClass){
+          this.$store.commit('utilModal/SET', {
+            ok: null,
+            cancel: null
+          })
+
           try {
             this.asyncProcess(true);
 
-            this.theClass.user.name = this.freeTeachers.find(v => v.id_field === this.theClass.user.id_field).name;
-            await this.$store.dispatch('classes/updateClass', this.theClass);
+            await this.$store.dispatch('classes/update', theClass);
 
             this.dialog = false;
 
-            this.theClass = JSON.parse(JSON.stringify(aClass));
-
             this.asyncProcess(false);
 
-            this.response.content = 'Udało się zaaktualizować klasę';
-            this.response.type = 'success';
-            this.response.modal = true;
+            this.$store.commit('utilModal/SET', {
+              content: 'Udało się zaaktualizować klase',
+              type: 'success',
+              ok: 'Ok',
+              onOk: null,
+              visible: true
+            })
           }
           catch (e) {
             this.asyncProcess(false);
-            this.response.content = e;
-            this.response.type = 'error';
-            this.response.modal = true;
+            
+            this.$store.commit('utilModal/SET', {
+              content: e.message,
+              type: 'error',
+              visible: true
+            })
           }
-        }
       },
 
       // Opening editing class modal
       // Preparing essential variables
       async editItem (theClass) {
-        this.editedIndex = this.classes.findIndex(v => v.id_field === theClass.id_field);
+        this.isEditing = true;
         this.beforeEdit = JSON.parse(JSON.stringify(theClass));
-        this.theClass = JSON.parse(JSON.stringify(theClass));
 
         if(!this.$store.getters['classes/loadedFreeTeachers']){
           this.asyncProcess(true);
@@ -267,82 +208,77 @@
           this.asyncProcess(false);
         }
 
+        this.loadDialog = true;
         this.dialog = true;
       },
 
       // Opening delete class modal
       // Preparing essential variables
       deleteItem (theClass) {
-        this.response.header = 'Uwaga';
-        this.response.content = `Czy na pewno chcesz usunąć klasę ${theClass.name}?`;
-        this.response.ok = 'Tak';
-        this.response.cancel = 'Anuluj';
-        this.response.type = 'error';
-        this.response.modal = true;
-
-        this.deletingClass.theClass = theClass;
-        this.deletingClass.index = this.classes.findIndex(v => v.id_field === theClass.id_field);
+        this.$store.commit('utilModal/SET', {
+          header: 'Uwaga',
+          content: `Czy na pewno chcesz usunąć klasę ${theClass.name}?`,
+          ok: 'Tak',
+          cancel: 'Anuluj',
+          type: 'error',
+          visible: true,
+          onOk: () => this.asDeleteClass(theClass.id_field, theClass.user)
+        })
       },
 
       // Deleting existing class
-      async asDeleteClass(){
+      async asDeleteClass(classId, teacher){
         try{
           this.asyncProcess(true);
-          await this.$store.dispatch('classes/deleteClass', {
-            id: this.deletingClass.theClass.id_field,
-            teacher: this.deletingClass.theClass.user
+          await this.$store.dispatch('classes/delete', {
+            id: classId,
+            teacher
           });
 
-          this.response.modal = false;
-
-          this.deletingClass = {
-            theClass: {},
-            index: null
-          };
+          this.$store.commit('utilModal/SET_VISIBLE', false)
 
           this.asyncProcess(false);
 
         } catch(e){
           this.asyncProcess(false);
-          this.response.content = e;
-          this.response.type = 'error';
-          this.response.modal = true;
-          this.response.ok = null;
-          this.response.cancel = null;
+          
+          this.$store.commit('utilModal/SET', {
+              content: e.message,
+              type: 'error',
+              visible: true,
+              ok: null,
+              cancel: null
+          })
         }
       },
 
       // Clearing edit's variables
       // Opening Add Class Modal
       async showAddModal(){
-        this.editedIndex = -1;
-        this.theClass = {
-          name: '',
-          user: {
-            name: '',
-            id_field: null
-          }
-        };
+        this.isEditing = false;
 
-        this.$refs.classform.resetValidation();
         if(this.$store.getters['classes/loadedFreeTeachers'] === false){
           this.$emit('async', true);
           await this.$store.dispatch('classes/getFreeTeachers');
           this.$emit('async', false);
         }
 
+        this.loadDialog = true;
         this.dialog = true;
       }
     },
 
     async created(){
+      // Vuex module
+      this.$store.registerModule('classes', classesModule);
+
       this.loading = true;
-      await this.$store.dispatch('classes/getClasses');
+      await this.$store.dispatch('classes/get');
       this.loading = false;
+    },
+
+    beforeDestroy(){
+      this.$store.unregisterModule('classes');
     }
   }
 </script>
-
-<style scoped>
-
-</style>
