@@ -3,14 +3,24 @@
         <!--HEADER - CLASSES-->
         <v-toolbar flat color="white">
             <v-toolbar-title>Klasy</v-toolbar-title>
-            <v-spacer></v-spacer>
-            <br>
+            <v-spacer/>
+            <v-flex xs10 sm3 mr-5>
+              <v-text-field
+                v-model="search"
+                append-icon="search"
+                label="Szukaj"
+                single-line
+                hide-details
+              ></v-text-field>
+            </v-flex>
+
             <v-btn
                     v-show="classes.length"
                     @click="showAddModal"
                     color="primary"
                     :disabled="loading"
                     :dark="!loading"
+                    data-cy="add-class"
                     class="mb-2">{{$vuetify.breakpoint.xsOnly ? '+' : 'Dodaj nową klasę'}}</v-btn>
             <!--ADDING CLASS-->
             <v-dialog v-model="dialog" max-width="600px">

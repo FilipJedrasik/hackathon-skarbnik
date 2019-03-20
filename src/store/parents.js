@@ -66,14 +66,15 @@ export default {
     },
     add: async ({commit}, parent) => {
       try{
-        await Vue.axios.post(
+        let { data } = await Vue.axios.post(
             'users/',
             {
               ...parent,
               role: 0
             }
         );
-        commit('ADD', parent);
+        data.password = "********";
+        commit('ADD', data);
       } catch(e){
         console.log('parent', e);
       }
